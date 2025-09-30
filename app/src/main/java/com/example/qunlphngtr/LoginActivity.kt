@@ -22,7 +22,7 @@ class LoginActivity : AppCompatActivity() {
         btnLogin.setOnClickListener {
             val email = inputEmail.text.toString().trim()
             val password = inputPassword.text.toString().trim()
-            val intent = Intent(this, QuanLyPhongActivity::class.java)
+            val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
 //            if (email.isEmpty() || password.isEmpty()) {
 //                Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show()
