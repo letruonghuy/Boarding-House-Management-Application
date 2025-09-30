@@ -40,6 +40,10 @@ class QuanLyPhongActivity : AppCompatActivity() {
         }
     }
 
+
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_room_list)
@@ -50,6 +54,9 @@ class QuanLyPhongActivity : AppCompatActivity() {
         // RecyclerView setup
         rvRooms = findViewById(R.id.rvRooms)
         rvRooms.layoutManager = LinearLayoutManager(this)
+
+
+
 
         // Load dữ liệu ban đầu từ DB
         val roomList = db.getAllRooms().toMutableList()
@@ -92,6 +99,8 @@ class QuanLyPhongActivity : AppCompatActivity() {
         val btnThemPhong = findViewById<Button>(R.id.btnAddRoom)
         btnThemPhong.setOnClickListener {
             showAddRoomDialog()
+
+
         }
     }
 

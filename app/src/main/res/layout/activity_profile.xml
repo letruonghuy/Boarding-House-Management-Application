@@ -2,82 +2,111 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:background="#FFFFFF">
+    android:background="#FFFFFF"
+    android:padding="16dp">
 
-    <!--<LinearLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal">
 
-        &lt;!&ndash; Avatar &ndash;&gt;
+        <!-- Header màu -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:background="@color/blue" />
+
+        <!-- Ảnh đại diện nổi lên -->
         <ImageView
             android:id="@+id/imgAvatar"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
             android:src="@drawable/ic_person"
-            android:background="@drawable/circle_bg"
+            android:layout_marginTop="-60dp"
+            android:background="@android:color/white"
             android:scaleType="centerCrop"
-            android:layout_marginBottom="16dp"/>
+            android:padding="8dp" />
 
-        &lt;!&ndash; Thông tin cá nhân &ndash;&gt;
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            android:padding="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tvName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Nguyễn Văn A"
-                    android:textSize="18sp"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:id="@+id/tvGender"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Nam"
-                    android:textSize="16sp"/>
-
-                <TextView
-                    android:id="@+id/tvPhone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0909123456"
-                    android:textSize="16sp"/>
-
-                <TextView
-                    android:id="@+id/tvEmail"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="abc@gmail.com"
-                    android:textSize="16sp"/>
-
-                <TextView
-                    android:id="@+id/tvAddress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Hà Nội"
-                    android:textSize="16sp"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        &lt;!&ndash; Nút chỉnh sửa &ndash;&gt;
-        <Button
-            android:id="@+id/btnEdit"
+        <!-- Thông tin người dùng -->
+        <TextView
+            android:id="@+id/tvName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Chỉnh sửa thông tin"/>
-    </LinearLayout>-->
+            android:text="Nguyễn Văn A"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            android:textColor="#000"/>
+
+        <TextView
+            android:id="@+id/tvEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="nguyenvana@gmail.com"
+            android:textColor="#666"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:id="@+id/tvPhone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SĐT: 0987 654 321"
+            android:textColor="#666"
+            android:layout_marginTop="2dp"/>
+
+        <!-- Nút chỉnh sửa -->
+        <Button
+            android:id="@+id/btnEditProfile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chỉnh sửa hồ sơ"
+            android:backgroundTint="@color/blue"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="12dp"/>
+
+        <!-- Card các tùy chọn -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="vertical"
+            android:background="@android:color/white"
+            android:elevation="4dp"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/btnChangePassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="🔑  Đổi mật khẩu"
+                android:textSize="16sp"
+                android:foreground="?android:attr/selectableItemBackground"/>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0"/>
+
+            <TextView
+                android:id="@+id/btnNotification"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="🔔  Cài đặt thông báo"
+                android:textSize="16sp"
+                android:foreground="?android:attr/selectableItemBackground"/>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0"/>
+
+            <TextView
+                android:id="@+id/btnLogout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="🚪  Đăng xuất"
+                android:textSize="16sp"
+                android:textColor="#D32F2F"
+                android:foreground="?android:attr/selectableItemBackground"/>
+        </LinearLayout>
+
+    </LinearLayout>
 </ScrollView>

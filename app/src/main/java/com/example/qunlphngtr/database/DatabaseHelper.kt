@@ -5,14 +5,16 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.example.qunlphngtr.model.Room
+import com.example.qunlphngtr.model.Tenant
 
 class DatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
         private const val DATABASE_NAME = "QuanLyPhongTro.db"
-        private const val DATABASE_VERSION = 2  // tăng version để update cột mới
+        private const val DATABASE_VERSION = 3   // tăng version mỗi khi đổi cấu trúc
 
+        // ===== Bảng Room =====
         const val TABLE_ROOM = "rooms"
         const val COLUMN_ID = "id"
         const val COLUMN_NAME = "name"
@@ -21,6 +23,13 @@ class DatabaseHelper(context: Context) :
         const val COLUMN_STATUS = "status"
         const val COLUMN_DESCRIPTION = "description"
         const val COLUMN_IMAGE_URI = "imageUri"
+
+        // ===== Bảng Tenant =====
+        const val TABLE_TENANT = "tenants"
+        const val TENANT_ID = "id"
+        const val TENANT_NAME = "name"
+        const val TENANT_GENDER = "gender"
+        const val TENANT_PHONE = "phone"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -36,14 +45,25 @@ class DatabaseHelper(context: Context) :
             )
         """.trimIndent()
         db.execSQL(createRoomTable)
+
+        val createTenantTable = """
+            CREATE TABLE $TABLE_TENANT (
+                $TENANT_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $TENANT_NAME TEXT,
+                $TENANT_GENDER TEXT,
+                $TENANT_PHONE TEXT
+            )
+        """.trimIndent()
+        db.execSQL(createTenantTable)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL("DROP TABLE IF EXISTS $TABLE_ROOM")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_TENANT")
         onCreate(db)
     }
 
-    // Insert Room (có thêm ảnh)
+    // ===== CRUD Room =====
     fun insertRoom(
         name: String,
         price: Double,
@@ -66,12 +86,10 @@ class DatabaseHelper(context: Context) :
         return result
     }
 
-    // Lấy tất cả phòng
     fun getAllRooms(): List<Room> {
         val roomList = mutableListOf<Room>()
         val db = readableDatabase
         val cursor = db.rawQuery("SELECT * FROM $TABLE_ROOM", null)
-
         if (cursor.moveToFirst()) {
             do {
                 val room = Room(
@@ -86,9 +104,65 @@ class DatabaseHelper(context: Context) :
                 roomList.add(room)
             } while (cursor.moveToNext())
         }
-
         cursor.close()
         db.close()
         return roomList
+    }
+
+    // ===== CRUD Tenant =====
+    fun insertTenant(name: String, gender: String, phone: String): Long {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(TENANT_NAME, name)
+            put(TENANT_GENDER, gender)
+            put(TENANT_PHONE, phone)
+        }
+        val result = db.insert(TABLE_TENANT, null, values)
+        db.close()
+        return result
+    }
+
+    fun getAllTenants(): MutableList<Tenant> {
+        val list = mutableListOf<Tenant>()
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_TENANT", null)
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(
+                    Tenant(
+                        name = cursor.getString(cursor.getColumnIndexOrThrow(TENANT_NAME)),
+                        gender = cursor.getString(cursor.getColumnIndexOrThrow(TENANT_GENDER)),
+                        phone = cursor.getString(cursor.getColumnIndexOrThrow(TENANT_PHONE))
+                    )
+                )
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        db.close()
+        return list
+    }
+
+    fun updateTenant(oldName: String, newTenant: Tenant): Int {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(TENANT_NAME, newTenant.name)
+            put(TENANT_GENDER, newTenant.gender)
+            put(TENANT_PHONE, newTenant.phone)
+        }
+        val rows = db.update(
+            TABLE_TENANT,
+            values,
+            "$TENANT_NAME = ?",
+            arrayOf(oldName)
+        )
+        db.close()
+        return rows
+    }
+
+    fun deleteTenant(name: String): Int {
+        val db = writableDatabase
+        val rows = db.delete(TABLE_TENANT, "$TENANT_NAME = ?", arrayOf(name))
+        db.close()
+        return rows
     }
 }

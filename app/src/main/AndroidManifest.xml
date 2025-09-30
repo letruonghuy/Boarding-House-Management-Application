@@ -25,17 +25,17 @@
 
         <activity android:name=".LoginActivity" android:exported="true" />
         <activity android:name=".RegisterActivity" android:exported="true" />
-<!--
         <activity android:name=".QuanLyPhongActivity" android:exported="true" />
--->
-        <activity android:name=".TenantListActivity" />
-
         <activity android:name=".MainActivity" android:exported="true" />
         <activity android:name=".BillActivity" android:exported="true" />
         <activity android:name=".SettingsActivity" android:exported="true" />
-        <activity android:name=".QuanLyPhongActivity" android:exported="true" />
         <activity android:name=".RoomDetailActivity" android:exported="true" />
         <activity android:name=".BillDetailActivity" android:exported="true" />
+        <activity android:name=".ProfileActivity" android:exported="true" />
+        <activity android:name=".TenantListActivity" android:exported="true" />
+        <activity android:name=".AddTenantActivity" android:exported="true" />
+        <activity android:name=".EditProfileActivity" android:exported="true" />
+
     </application>
 
 </manifest>

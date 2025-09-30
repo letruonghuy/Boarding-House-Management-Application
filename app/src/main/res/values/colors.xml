@@ -7,4 +7,6 @@
     <color name="status_rented">#C62828</color>
     <color name="blue">#2196F3</color>
     <color name="bg_dark_blue">#0D1B3D</color>
+    <color name="white">#FFFFFF</color>
+    <color name="red">#F44336</color>
 </resources>

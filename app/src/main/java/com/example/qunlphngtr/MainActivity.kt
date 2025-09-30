@@ -40,5 +40,10 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, QuanLyPhongActivity::class.java)
             startActivity(intent)
         }
+        val cardTenantList = findViewById<MaterialCardView>(R.id.card2);
+        cardTenantList.setOnClickListener {
+            val intent = Intent(this, TenantListActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
