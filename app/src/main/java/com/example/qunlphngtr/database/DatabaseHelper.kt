@@ -6,23 +6,24 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.example.qunlphngtr.model.Room
 import com.example.qunlphngtr.model.Tenant
+import com.example.qunlphngtr.model.Bill
 
 class DatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
         private const val DATABASE_NAME = "QuanLyPhongTro.db"
-        private const val DATABASE_VERSION = 3   // tăng version mỗi khi đổi cấu trúc
+        private const val DATABASE_VERSION = 7   // tăng version mỗi khi đổi cấu trúc
 
         // ===== Bảng Room =====
         const val TABLE_ROOM = "rooms"
-        const val COLUMN_ID = "id"
-        const val COLUMN_NAME = "name"
-        const val COLUMN_PRICE = "price"
-        const val COLUMN_AREA = "area"
-        const val COLUMN_STATUS = "status"
-        const val COLUMN_DESCRIPTION = "description"
-        const val COLUMN_IMAGE_URI = "imageUri"
+        const val ROOM_ID = "room_id"
+        const val ROOM_NAME = "name"
+        const val ROOM_PRICE = "price"
+        const val ROOM_AREA = "area"
+        const val ROOM_STATUS = "status"
+        const val ROOM_DESCRIPTION = "description"
+        const val ROOM_IMAGE_URI = "image_uri"
 
         // ===== Bảng Tenant =====
         const val TABLE_TENANT = "tenants"
@@ -30,6 +31,17 @@ class DatabaseHelper(context: Context) :
         const val TENANT_NAME = "name"
         const val TENANT_GENDER = "gender"
         const val TENANT_PHONE = "phone"
+        // ===== Bảng Bill =====
+        const val TABLE_BILL = "bills"
+        const val BILL_ID = "bill_id"
+        const val BILL_MONTH = "month"
+        const val BILL_ELECTRIC = "electric"
+        const val BILL_WATER = "water"
+        const val BILL_ROOM = "room_price"
+        const val BILL_INTERNET = "internet"
+        const val BILL_TOTAL = "total"
+        const val BILL_ROOM_ID = "room_id"
+        const val BILL_TENANT_ID = "tenant_id"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -42,6 +54,13 @@ class DatabaseHelper(context: Context) :
                 $COLUMN_STATUS TEXT,
                 $COLUMN_DESCRIPTION TEXT,
                 $COLUMN_IMAGE_URI TEXT
+                $ROOM_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $ROOM_NAME TEXT,
+                $ROOM_PRICE REAL,
+                $ROOM_AREA REAL,
+                $ROOM_STATUS TEXT,
+                $ROOM_DESCRIPTION TEXT,
+                $ROOM_IMAGE_URI TEXT
             )
         """.trimIndent()
         db.execSQL(createRoomTable)
@@ -55,11 +74,29 @@ class DatabaseHelper(context: Context) :
             )
         """.trimIndent()
         db.execSQL(createTenantTable)
+        // ===== Bảng Bill =====
+        val createBillTable = """
+            CREATE TABLE $TABLE_BILL (
+                $BILL_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $BILL_MONTH TEXT,
+                $BILL_ELECTRIC REAL,
+                $BILL_WATER REAL,
+                $BILL_ROOM REAL,
+                $BILL_INTERNET REAL,
+                $BILL_TOTAL REAL,
+                $BILL_ROOM_ID INTEGER,
+                $BILL_TENANT_ID INTEGER,
+                FOREIGN KEY ($BILL_ROOM_ID) REFERENCES $TABLE_ROOM($ROOM_ID),
+                FOREIGN KEY ($BILL_TENANT_ID) REFERENCES $TABLE_TENANT($TENANT_ID)
+            )
+        """.trimIndent()
+        db.execSQL(createBillTable)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL("DROP TABLE IF EXISTS $TABLE_ROOM")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_TENANT")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_BILL")
         onCreate(db)
     }
 
@@ -74,12 +111,12 @@ class DatabaseHelper(context: Context) :
     ): Long {
         val db = writableDatabase
         val values = ContentValues().apply {
-            put(COLUMN_NAME, name)
-            put(COLUMN_PRICE, price)
-            put(COLUMN_AREA, area)
-            put(COLUMN_STATUS, status)
-            put(COLUMN_DESCRIPTION, description)
-            put(COLUMN_IMAGE_URI, imageUri)
+            put(ROOM_NAME, name)
+            put(ROOM_PRICE, price)
+            put(ROOM_AREA, area)
+            put(ROOM_STATUS, status)
+            put(ROOM_DESCRIPTION, description)
+            put(ROOM_IMAGE_URI, imageUri)
         }
         val result = db.insert(TABLE_ROOM, null, values)
         db.close()
@@ -93,13 +130,13 @@ class DatabaseHelper(context: Context) :
         if (cursor.moveToFirst()) {
             do {
                 val room = Room(
-                    id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
-                    name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
-                    price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_PRICE)),
-                    area = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_AREA)),
-                    status = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS)),
-                    description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)),
-                    imageUri = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_URI))
+                    id = cursor.getInt(cursor.getColumnIndexOrThrow(ROOM_ID)),
+                    name = cursor.getString(cursor.getColumnIndexOrThrow(ROOM_NAME)),
+                    price = cursor.getDouble(cursor.getColumnIndexOrThrow(ROOM_PRICE)),
+                    area = cursor.getDouble(cursor.getColumnIndexOrThrow(ROOM_AREA)),
+                    status = cursor.getString(cursor.getColumnIndexOrThrow(ROOM_STATUS)),
+                    description = cursor.getString(cursor.getColumnIndexOrThrow(ROOM_DESCRIPTION)),
+                    imageUri = cursor.getString(cursor.getColumnIndexOrThrow(ROOM_IMAGE_URI))
                 )
                 roomList.add(room)
             } while (cursor.moveToNext())
@@ -160,8 +197,9 @@ class DatabaseHelper(context: Context) :
     }
 
     fun deleteTenant(name: String): Int {
+    fun deleteBill(id: Int): Int {
         val db = writableDatabase
-        val rows = db.delete(TABLE_TENANT, "$TENANT_NAME = ?", arrayOf(name))
+        val rows = db.delete(TABLE_BILL, "$BILL_ID = ?", arrayOf(id.toString()))
         db.close()
         return rows
     }
