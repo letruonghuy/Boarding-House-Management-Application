@@ -9,7 +9,7 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         const val DATABASE_NAME = "boarding_house.db"
-        const val DATABASE_VERSION = 5
+        const val DATABASE_VERSION = 6
     }
 
     override fun onConfigure(db: SQLiteDatabase) {

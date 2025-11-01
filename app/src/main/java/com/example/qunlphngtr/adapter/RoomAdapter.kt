@@ -1,6 +1,7 @@
 package com.example.qunlphngtr.adapter
 
 import android.net.Uri
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,17 +18,27 @@ class RoomAdapter(
 
     inner class RoomViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.tvRoomName)
-        val tvPrice: TextView = itemView.findViewById(R.id.tvRoomPrice)
         val imgRoom: ImageView = itemView.findViewById(R.id.imgRoom)
 
         fun bind(room: Room) {
             tvName.text = room.name
-            tvPrice.text = "${room.price} VNĐ"
+
+            // --- SỬA: Thêm try-catch để chống crash ---
             if (!room.imageUri.isNullOrEmpty()) {
-                imgRoom.setImageURI(Uri.parse(room.imageUri))
+                try {
+                    // Cố gắng hiển thị ảnh từ URI
+                    imgRoom.setImageURI(Uri.parse(room.imageUri))
+                } catch (e: SecurityException) {
+                    // Nếu thất bại (ví dụ: mất quyền, file bị xóa),
+                    // hiển thị ảnh mặc định và log lỗi ra.
+                    Log.e("RoomAdapter", "Không thể tải ảnh: ${room.imageUri}", e)
+                    imgRoom.setImageResource(R.drawable.ic_room)
+                }
             } else {
+                // Không có URI, hiển thị ảnh mặc định
                 imgRoom.setImageResource(R.drawable.ic_room)
             }
+            // --- Kết thúc sửa ---
 
             itemView.setOnClickListener { onItemClick(room) }
         }

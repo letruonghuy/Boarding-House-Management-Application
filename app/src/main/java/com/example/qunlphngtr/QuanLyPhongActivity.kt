@@ -1,6 +1,7 @@
 package com.example.qunlphngtr
 
 import android.app.Dialog
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -9,9 +10,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.*
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts // Đảm bảo import đúng
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,12 +29,26 @@ class QuanLyPhongActivity : AppCompatActivity() {
     private var selectedImageUri: Uri? = null
     private var imgPhong: ImageView? = null
 
+    // --- SỬA 1: Đổi GetContent thành OpenDocument ---
+    // OpenDocument cho phép chúng ta lấy quyền truy cập dài hạn
     private val pickImageLauncher = registerForActivityResult(
-        ActivityResultContracts.GetContent()
+        ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         if (uri != null) {
-            selectedImageUri = uri
-            imgPhong?.setImageURI(uri)
+            // --- SỬA 2: Lấy quyền truy cập dài hạn ---
+            // Dòng này rất quan trọng. Nó yêu cầu hệ thống cho phép ứng dụng
+            // của bạn đọc URI này vĩnh viễn (cho đến khi app bị gỡ cài đặt).
+            try {
+                contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+                selectedImageUri = uri
+                imgPhong?.setImageURI(uri)
+            } catch (e: SecurityException) {
+                e.printStackTrace()
+                Toast.makeText(this, "Không thể lấy quyền truy cập ảnh", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -64,7 +78,30 @@ class QuanLyPhongActivity : AppCompatActivity() {
         setupSwipeActions()
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        bottomNav.selectedItemId = R.id.nav_home
+        bottomNav?.let {
+            it.selectedItemId = R.id.nav_home
+            it.setOnItemSelectedListener { item ->
+                when (item.itemId) {
+                    R.id.nav_home -> true
+                    R.id.nav_bill -> {
+                        // Giả sử bạn có BillActivity
+                        // val intent = Intent(this, BillActivity::class.java)
+                        // startActivity(intent)
+                        overridePendingTransition(0, 0)
+                        finish() // Đóng màn hình này
+                        true
+                    }
+                    R.id.nav_settings -> {
+                        val intent = Intent(this, SettingsActivity::class.java)
+                        startActivity(intent)
+                        overridePendingTransition(0, 0)
+                        finish() // Đóng màn hình này
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }
     }
 
     private fun showAddRoomDialog(roomToEdit: Room? = null) {
@@ -79,15 +116,25 @@ class QuanLyPhongActivity : AppCompatActivity() {
         val btnLuu = dialog.findViewById<Button>(R.id.btnLuu)
         val btnHuy = dialog.findViewById<Button>(R.id.btnHuy)
 
+        // Reset biến global khi mở dialog
+        selectedImageUri = null
+
         if (roomToEdit != null) {
             edtTenPhong.setText(roomToEdit.name)
             edtGiaPhong.setText(roomToEdit.price.toString())
             edtDienTich.setText(roomToEdit.area.toString())
+            // Lưu URI từ DB vào `selectedImageUri` để nếu không chọn ảnh mới, nó vẫn giữ ảnh cũ
             selectedImageUri = roomToEdit.imageUri?.let { Uri.parse(it) }
             selectedImageUri?.let { imgPhong?.setImageURI(it) }
+        } else {
+            imgPhong?.setImageResource(R.drawable.ic_room) // Đặt ảnh mặc định (nếu có)
         }
 
-        btnChonAnh.setOnClickListener { pickImageLauncher.launch("image/*") }
+        btnChonAnh.setOnClickListener {
+            // --- SỬA 3: Thay đổi cách gọi launch ---
+            // OpenDocument yêu cầu một mảng các kiểu MIME
+            pickImageLauncher.launch(arrayOf("image/*"))
+        }
 
         btnLuu.setOnClickListener {
             val name = edtTenPhong.text.toString()
@@ -99,14 +146,29 @@ class QuanLyPhongActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            // Xác định URI cuối cùng để lưu
+            val finalImageUri: String? = if (selectedImageUri != null) {
+                // Người dùng đã chọn ảnh mới (hoặc giữ ảnh cũ)
+                selectedImageUri.toString()
+            } else if (roomToEdit != null) {
+                // Người dùng không chọn ảnh mới, giữ nguyên ảnh cũ
+                roomToEdit.imageUri
+            } else {
+                // Thêm phòng mới và không chọn ảnh
+                null
+            }
+
             if (roomToEdit == null) {
-                val newRoom = Room(0, name, price, area, "available", "Chưa có mô tả", selectedImageUri?.toString())
+                val newRoom = Room(0, name, price, area, "available", "Chưa có mô tả", finalImageUri)
                 val id = roomDao.insertRoom(newRoom)
-                if (id > 0) roomAdapter.addRoom(newRoom.copy(id = id.toInt()))
+                if (id > 0) {
+                    roomAdapter.addRoom(newRoom.copy(id = id.toInt()))
+                    rvRooms.scrollToPosition(roomAdapter.itemCount - 1)
+                }
             } else {
                 val updated = roomToEdit.copy(
                     name = name, price = price, area = area,
-                    imageUri = selectedImageUri?.toString()
+                    imageUri = finalImageUri
                 )
                 roomDao.updateRoom(updated)
                 roomAdapter.updateRoom(updated)
@@ -134,13 +196,14 @@ class QuanLyPhongActivity : AppCompatActivity() {
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
+                if (position == RecyclerView.NO_POSITION) return
                 val room = roomAdapter.getRoomAt(position)
 
                 if (direction == ItemTouchHelper.LEFT) {
                     val result = roomDao.deleteRoom(room.id)
                     if (result > 0) roomAdapter.removeRoom(room)
                 } else if (direction == ItemTouchHelper.RIGHT) {
-                    roomAdapter.notifyItemChanged(position)
+                    roomAdapter.notifyItemChanged(position) // Vẽ lại item
                     showAddRoomDialog(room)
                 }
             }
