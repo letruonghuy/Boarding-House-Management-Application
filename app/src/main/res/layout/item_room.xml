@@ -53,7 +53,17 @@
                 android:text="Có ban công, 25m², gần chợ"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="13sp" />
+            <TextView
+                android:id="@+id/tvRoomPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Giá: 2.500.000đ/tháng"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="14sp" />
+
+
 
         </LinearLayout>
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>

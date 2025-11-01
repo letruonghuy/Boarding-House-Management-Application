@@ -1,7 +1,7 @@
 package com.example.qunlphngtr.model
 
 data class Room(
-    val id: Int,
+    val id: Int = 0,
     val name: String,
     val price: Double,
     val area: Double,
