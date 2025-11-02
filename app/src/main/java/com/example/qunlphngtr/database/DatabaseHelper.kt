@@ -9,7 +9,7 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         const val DATABASE_NAME = "boarding_house.db"
-        const val DATABASE_VERSION = 6
+        const val DATABASE_VERSION = 7
     }
 
     override fun onConfigure(db: SQLiteDatabase) {
@@ -26,6 +26,13 @@ class DatabaseHelper(context: Context) :
                 role TEXT CHECK(role IN ('landlord', 'tenant')) NOT NULL
             )
         """)
+        // --- BƯỚC 1: THÊM TÀI KHOẢN CHỦ TRỌ MẶC ĐỊNH ---
+        // Thêm một tài khoản
+        db.execSQL("""
+            INSERT INTO User (username, password, role) 
+            VALUES ('chutro', '123456', 'landlord')
+        """)
+        //
 
         db.execSQL("""
             CREATE TABLE Room (

@@ -8,7 +8,6 @@
     android:background="@drawable/bg_gradient"
     android:padding="24dp">
 
-    <!-- Tiêu đề -->
     <TextView
         android:id="@+id/appTitle"
         android:layout_width="wrap_content"
@@ -19,9 +18,6 @@
         android:textStyle="bold"
         android:layout_marginBottom="24dp" />
 
-    <!-- Hình minh họa -->
-
-    <!-- Ô nhập Số điện thoại -->
     <ImageView
         android:id="@+id/loginImage"
         android:layout_width="200dp"
@@ -34,7 +30,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Số điện thoại"
+        android:hint="Tên đăng nhập"
         app:boxBackgroundMode="filled"
         app:boxCornerRadiusTopStart="12dp"
         app:boxCornerRadiusTopEnd="12dp"
@@ -43,13 +39,11 @@
         app:boxStrokeColor="@color/blue">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/inputPhone"
+            android:id="@+id/inputUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="phone" />
+            android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- Ô nhập Mật khẩu -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -70,7 +64,6 @@
             android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Nút đăng nhập -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
@@ -83,7 +76,6 @@
         android:layout_marginTop="20dp"
         android:padding="14dp"/>
 
-    <!-- Chuyển qua đăng ký -->
     <TextView
         android:id="@+id/tvRegister"
         android:layout_width="wrap_content"
