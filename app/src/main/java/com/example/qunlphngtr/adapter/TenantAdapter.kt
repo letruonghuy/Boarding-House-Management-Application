@@ -3,8 +3,10 @@ package com.example.qunlphngtr.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.qunlphngtr.R
 import com.example.qunlphngtr.model.Tenant
 
@@ -20,6 +22,7 @@ class TenantAdapter(
         val tvName: TextView = itemView.findViewById(R.id.tvName)
         val tvGender: TextView = itemView.findViewById(R.id.tvGender)
         val tvPhone: TextView = itemView.findViewById(R.id.tvPhone)
+        val imgTenant: ImageView = itemView.findViewById(R.id.imgTenant)
 
         init {
             // Bấm 1 lần
@@ -52,6 +55,16 @@ class TenantAdapter(
         holder.tvName.text = tenant.name
         holder.tvGender.text = "Giới tính: ${tenant.gender}"
         holder.tvPhone.text = tenant.phone
+        // load imageUri nếu có
+        if (!tenant.imageUri.isNullOrEmpty()) {
+            Glide.with(holder.itemView)
+                .load(tenant.imageUri)
+                .placeholder(R.drawable.ic_person)
+                .error(R.drawable.ic_person)
+                .into(holder.imgTenant)
+        } else {
+            holder.imgTenant.setImageResource(R.drawable.ic_person)
+        }
     }
 
     override fun getItemCount(): Int = tenantList.size

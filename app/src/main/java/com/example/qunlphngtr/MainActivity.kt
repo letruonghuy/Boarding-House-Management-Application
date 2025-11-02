@@ -2,6 +2,7 @@ package com.example.qunlphngtr
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.qunlphngtr.database.DatabaseHelper
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -42,7 +43,16 @@ class MainActivity : AppCompatActivity() {
         }
         val cardTenantList = findViewById<MaterialCardView>(R.id.card2);
         cardTenantList.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            // Toast để xác nhận sự kiện click đã được gọi
+            Toast.makeText(this, "Mở Quản lý Người Thuê...", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, TenantListActivity::class.java)
+            startActivity(intent)
+        }
+        val cardBill = findViewById<MaterialCardView>(R.id.card3);
+        cardBill.setOnClickListener {
+            // Toast để xác nhận sự kiện click đã được gọi
+            Toast.makeText(this, "Mở Hóa đơn...", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, BillActivity::class.java)
             startActivity(intent)
         }
     }
