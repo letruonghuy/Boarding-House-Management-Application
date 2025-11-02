@@ -35,7 +35,7 @@
         <activity android:name=".TenantListActivity" android:exported="true" />
         <activity android:name=".AddTenantActivity" android:exported="true" />
         <activity android:name=".EditProfileActivity" android:exported="true" />
-
+        <activity android:name=".TenantHomeActivity" android:exported="true" />
     </application>
 
 </manifest>

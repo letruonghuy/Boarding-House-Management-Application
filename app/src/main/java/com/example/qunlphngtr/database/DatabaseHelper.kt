@@ -27,6 +27,13 @@ class DatabaseHelper(context: Context) :
                 role TEXT CHECK(role IN ('landlord', 'tenant')) NOT NULL
             )
         """)
+        // --- BƯỚC 1: THÊM TÀI KHOẢN CHỦ TRỌ MẶC ĐỊNH ---
+        // Thêm một tài khoản
+        db.execSQL("""
+            INSERT INTO User (username, password, role) 
+            VALUES ('chutro', '123456', 'landlord')
+        """)
+        //
 
         db.execSQL("""
             CREATE TABLE Room (
