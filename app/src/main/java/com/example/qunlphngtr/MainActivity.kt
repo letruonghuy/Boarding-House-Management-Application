@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> true
                 R.id.nav_bill -> {
-                    startActivity(Intent(this, BillActivity::class.java))
+//                    startActivity(Intent(this, MainActivity::class.java))
                     overridePendingTransition(0, 0)
                     true
                 }
@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         }
         val cardTenantList = findViewById<MaterialCardView>(R.id.card2);
         cardTenantList.setOnClickListener {
-            val intent = Intent(this, TenantListActivity::class.java)
+            val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
     }

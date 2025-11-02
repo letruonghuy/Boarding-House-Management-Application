@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tạo hóa đơn"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/etMonth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Tháng (vd: 6/2025)"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/etElectric"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Tiền điện"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/etWater"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Tiền nước"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/etRoom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Tiền phòng"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/etInternet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Internet"
+            android:inputType="numberDecimal" />
+        <Spinner
+            android:id="@+id/spRoom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:prompt="@string/chon_phong" />
+
+        <Spinner
+            android:id="@+id/spTenant"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:prompt="@string/chon_nguoi_thue" />
+
+        <Button
+            android:id="@+id/btnSaveBill"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lưu hóa đơn"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/blue"
+            android:textColor="@android:color/white" />
+
+    </LinearLayout>
+</ScrollView>

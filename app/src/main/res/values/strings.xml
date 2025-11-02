@@ -14,4 +14,6 @@
     <string name="toast_notifications">Đi tới Thông báo &amp; Nhắc nhở</string>
     <string name="toast_feedback">Đi tới Khiếu nại / Phản ánh</string>
     <string name="add_room">Thêm phòng</string>
+    <string name="chon_phong">Chọn phòng</string>
+    <string name="chon_nguoi_thue">Chọn người thuê</string>
 </resources>
