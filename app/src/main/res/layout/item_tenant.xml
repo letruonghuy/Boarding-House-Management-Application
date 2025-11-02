@@ -6,8 +6,6 @@
     android:padding="12dp"
     android:layout_marginBottom="8dp"
     android:gravity="center_vertical">
-    <!--android:background="@drawable/bg_item"-->
-
 
     <!-- Nội dung bên trái -->
     <LinearLayout
@@ -42,14 +40,15 @@
             android:textColor="#666666"/>
     </LinearLayout>
 
-    <!-- Avatar/Icon bên phải -->
+    <!-- Avatar/Ảnh người thuê bên phải -->
     <ImageView
-        android:id="@+id/imgAvatar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:id="@+id/imgTenant"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:src="@android:drawable/ic_menu_myplaces"
         android:background="#EEEEEE"
-        android:scaleType="centerInside"
-        android:padding="8dp"
-        android:layout_marginLeft="8dp"/>
+        android:scaleType="centerCrop"
+        android:padding="4dp"
+        android:layout_marginLeft="8dp"
+        android:contentDescription="Ảnh người thuê"/>
 </LinearLayout>

@@ -4,6 +4,27 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Image người thuê -->
+
+
+    <ImageView
+        android:id="@+id/imgTenant"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center"
+        android:contentDescription="Ảnh người thuê"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_person" />
+    <!-- Button chọn ảnh -->
+    <Button
+        android:id="@+id/btnChooseImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chọn ảnh"
+        android:backgroundTint="@color/blue"
+        android:layout_gravity="center"
+        android:layout_marginTop="8dp"/>
+
     <EditText
         android:id="@+id/edtName"
         android:hint="Tên người thuê"
