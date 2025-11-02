@@ -34,7 +34,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Họ và tên"
-            android:layout_marginTop="12dp" />
+            android:layout_marginTop="12dp"
+            android:inputType="textPersonName" />
 
         <EditText
             android:id="@+id/edtEmail"
@@ -54,7 +55,8 @@
             android:id="@+id/edtAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Địa chỉ" />
+            android:hint="Địa chỉ"
+            android:inputType="textPostalAddress" />
 
         <!-- Ngày sinh -->
         <LinearLayout

@@ -9,6 +9,7 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         const val DATABASE_NAME = "boarding_house.db"
+        // tăng version để onUpgrade tạo lại DB với cột mới imageUri
         const val DATABASE_VERSION = 7
     }
 
@@ -52,6 +53,7 @@ class DatabaseHelper(context: Context) :
                 name TEXT NOT NULL,
                 gender TEXT,
                 phone TEXT,
+                imageUri TEXT,
                 identity_number TEXT,
                 room_id INTEGER,
                 start_date TEXT,

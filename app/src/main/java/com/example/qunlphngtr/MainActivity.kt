@@ -70,6 +70,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         cardTenantList.setOnClickListener {
+            // Toast để xác nhận sự kiện click đã được gọi
+            Toast.makeText(this, "Mở Quản lý Người Thuê...", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, TenantListActivity::class.java)
+            startActivity(intent)
+        }
+        val cardBill = findViewById<MaterialCardView>(R.id.card3);
+        cardBill.setOnClickListener {
+            // Toast để xác nhận sự kiện click đã được gọi
+            Toast.makeText(this, "Mở Hóa đơn...", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, BillActivity::class.java)
+            startActivity(intent)
             Toast.makeText(this, "Mở Quản lý Người thuê", Toast.LENGTH_SHORT).show()
             // val intent = Intent(this, TenantManagementActivity::class.java)
             // startActivity(intent)
