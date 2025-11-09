@@ -36,7 +36,7 @@ class NotificationsActivity : AppCompatActivity() {
 
         findViewById<LinearLayout>(R.id.navProfile).setOnClickListener {
             // Mở Activity Cá nhân
-            val intent = Intent(this, ProfileActivity::class.java)
+            val intent = Intent(this, ProfileUserActivity::class.java)
             startActivity(intent)
             overridePendingTransition(0, 0)
             finish() // Đóng Activity hiện tại
