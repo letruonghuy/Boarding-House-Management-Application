@@ -36,6 +36,10 @@
         <activity android:name=".AddTenantActivity" android:exported="true" />
         <activity android:name=".EditProfileActivity" android:exported="true" />
         <activity android:name=".TenantHomeActivity" android:exported="true" />
+        <activity android:name=".ProfileUserActivity" />
+        <activity android:name=".NotificationsActivity" />
+
+
     </application>
 
 </manifest>
