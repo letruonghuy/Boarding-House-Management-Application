@@ -13,7 +13,7 @@ class ProfileUserActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // 1. Đặt layout cho màn hình Cá nhân
-        setContentView(R.layout.activity_profile) // Gợi ý: Đổi tên file này thành "activity_profile.xml"
+        setContentView(R.layout.activity_user_profile) // Gợi ý: Đổi tên file này thành "activity_profile.xml"
 
         // 2. Gán sự kiện cho các nút trên màn hình Cá nhân
         setupProfileEvents()
