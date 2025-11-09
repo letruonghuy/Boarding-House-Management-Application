@@ -10,7 +10,7 @@ class DatabaseHelper(context: Context) :
     companion object {
         const val DATABASE_NAME = "boarding_house.db"
         // tăng version để onUpgrade tạo lại DB với cột mới imageUri
-        const val DATABASE_VERSION = 7
+        const val DATABASE_VERSION = 8
     }
 
     override fun onConfigure(db: SQLiteDatabase) {

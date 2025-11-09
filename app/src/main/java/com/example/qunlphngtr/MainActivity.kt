@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         cardBill.setOnClickListener {
-            // Toast để xác nhận sự kiện click đã được gọi
+            // Toast để xác nhận sự kiện click đã ược gọi
             Toast.makeText(this, "Mở Hóa đơn...", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, BillActivity::class.java)
             startActivity(intent)

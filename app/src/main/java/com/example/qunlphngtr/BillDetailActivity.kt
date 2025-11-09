@@ -1,6 +1,8 @@
 package com.example.qunlphngtr
 
+import android.content.Context
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -33,17 +35,26 @@ class BillDetailActivity : AppCompatActivity() {
         tvTitle.text = "Hóa đơn tháng ${bill.month}"
         tvElectric.text = "${bill.electric} đ"
         tvWater.text = "${bill.water} đ"
-        tvRoom.text = "${bill.room} đ"
+        tvRoom.text = "${bill.roomFee} đ"
         tvInternet.text = "${bill.internet} đ"
         tvSum.text = "${bill.total} đ"
 
-        btnPay.setOnClickListener {
-            val updated = billDao.updateBillStatus(bill.id, "paid")
-            if (updated > 0) {
-                Toast.makeText(this, "Đã đánh dấu là đã thanh toán", Toast.LENGTH_SHORT).show()
-                finish()
-            } else {
-                Toast.makeText(this, "Cập nhật thất bại", Toast.LENGTH_SHORT).show()
+        // Lấy thông tin người dùng từ SharedPreferences
+        val prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        val userRole = prefs.getString("role", null)
+
+        // Ẩn nút thanh toán nếu là chủ trọ
+        if (userRole == "landlord") {
+            btnPay.visibility = View.GONE
+        } else {
+            btnPay.setOnClickListener {
+                val updated = billDao.updateBillStatus(bill.id, "paid")
+                if (updated > 0) {
+                    Toast.makeText(this, "Đã đánh dấu là đã thanh toán", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else {
+                    Toast.makeText(this, "Cập nhật thất bại", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

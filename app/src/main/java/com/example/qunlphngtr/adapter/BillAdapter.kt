@@ -34,7 +34,7 @@ class BillAdapter(private var billList: MutableList<Bill>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val bill = billList[position]
         holder.tvTitle.text = "Hóa đơn tháng ${bill.month}"
-        holder.tvDesc.text = "Tiền điện: ${bill.electric} | Nước: ${bill.water} | Phòng: ${bill.room} | Internet: ${bill.internet}"
+        holder.tvDesc.text = "Tiền điện: ${bill.electric} | Nước: ${bill.water} | Phòng: ${bill.roomFee} | Internet: ${bill.internet}"
         holder.tvPrice.text = "${bill.total} đ"
     }
 
