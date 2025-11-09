@@ -4,9 +4,11 @@ data class Bill(
     val month: String,
     val electric: Double,
     val water: Double,
-    val room: Double,
+    val roomFee: Double,
     val internet: Double,
     val total: Double,
     val roomId: Int,
-    val tenantId: Int
+    val tenantId: Int,
+    val roomName: String = "",
+    val status: String = "unpaid"
 )

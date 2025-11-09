@@ -3,7 +3,6 @@ package com.example.qunlphngtr
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -61,6 +60,7 @@ class MainActivity : AppCompatActivity() {
 
         val cardQuanLyPhong = findViewById<MaterialCardView>(R.id.card1);
         val cardTenantList = findViewById<MaterialCardView>(R.id.card2);
+        val cardBill = findViewById<MaterialCardView>(R.id.card3);
 
         // Không cần ẩn/hiện nữa, vì màn hình này giờ CHỈ dành cho landlord
 
@@ -75,15 +75,12 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, TenantListActivity::class.java)
             startActivity(intent)
         }
-        val cardBill = findViewById<MaterialCardView>(R.id.card3);
         cardBill.setOnClickListener {
-            // Toast để xác nhận sự kiện click đã được gọi
+            // Toast để xác nhận sự kiện click đã ược gọi
             Toast.makeText(this, "Mở Hóa đơn...", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, BillActivity::class.java)
             startActivity(intent)
-            Toast.makeText(this, "Mở Quản lý Người thuê", Toast.LENGTH_SHORT).show()
-            // val intent = Intent(this, TenantManagementActivity::class.java)
-            // startActivity(intent)
+
         }
     }
 }

@@ -17,16 +17,7 @@
         android:textStyle="bold"
         android:textColor="@android:color/black" />
 
-    <!-- Ô tìm kiếm -->
-    <EditText
-        android:id="@+id/edtSearch"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:hint="Tìm kiếm"
-        android:paddingStart="12dp"
-        android:drawableStart="@android:drawable/ic_menu_search"
-        android:background="@android:drawable/edit_text"
-        android:layout_marginTop="12dp"/>
+
     <LinearLayout
         android:id="@+id/btnSelectMonth"
         android:layout_width="match_parent"
