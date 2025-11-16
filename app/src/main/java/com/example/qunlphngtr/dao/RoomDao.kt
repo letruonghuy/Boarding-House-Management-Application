@@ -18,6 +18,11 @@ class RoomDao(context: Context) {
             put("status", room.status)
             put("description", room.description)
             put("imageUri", room.imageUri)
+            if (room.tenantId != null) {
+                put("tenantId", room.tenantId)
+            } else {
+                putNull("tenantId")
+            }
         }
         val id = db.insert("Room", null, values)
         db.close()
@@ -30,6 +35,9 @@ class RoomDao(context: Context) {
         val cursor: Cursor = db.rawQuery("SELECT * FROM Room", null)
         if (cursor.moveToFirst()) {
             do {
+                val tenantIdIndex = cursor.getColumnIndex("tenantId")
+                val tenantId = if (tenantIdIndex != -1 && !cursor.isNull(tenantIdIndex)) cursor.getInt(tenantIdIndex) else null
+
                 rooms.add(
                     Room(
                         id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
@@ -38,7 +46,8 @@ class RoomDao(context: Context) {
                         area = cursor.getDouble(cursor.getColumnIndexOrThrow("area")),
                         status = cursor.getString(cursor.getColumnIndexOrThrow("status")),
                         description = cursor.getString(cursor.getColumnIndexOrThrow("description")),
-                        imageUri = cursor.getString(cursor.getColumnIndexOrThrow("imageUri"))
+                        imageUri = cursor.getString(cursor.getColumnIndexOrThrow("imageUri")),
+                        tenantId = tenantId
                     )
                 )
             } while (cursor.moveToNext())
@@ -57,6 +66,11 @@ class RoomDao(context: Context) {
             put("status", room.status)
             put("description", room.description)
             put("imageUri", room.imageUri)
+            if (room.tenantId != null) {
+                put("tenantId", room.tenantId)
+            } else {
+                putNull("tenantId")
+            }
         }
         val result = db.update("Room", values, "id = ?", arrayOf(room.id.toString()))
         db.close()
@@ -79,6 +93,9 @@ class RoomDao(context: Context) {
         )
         if (cursor.moveToFirst()) {
             do {
+                val tenantIdIndex = cursor.getColumnIndex("tenantId")
+                val tenantId = if (tenantIdIndex != -1 && !cursor.isNull(tenantIdIndex)) cursor.getInt(tenantIdIndex) else null
+
                 rooms.add(
                     Room(
                         id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
@@ -87,7 +104,8 @@ class RoomDao(context: Context) {
                         area = cursor.getDouble(cursor.getColumnIndexOrThrow("area")),
                         status = cursor.getString(cursor.getColumnIndexOrThrow("status")),
                         description = cursor.getString(cursor.getColumnIndexOrThrow("description")),
-                        imageUri = cursor.getString(cursor.getColumnIndexOrThrow("imageUri"))
+                        imageUri = cursor.getString(cursor.getColumnIndexOrThrow("imageUri")),
+                        tenantId = tenantId
                     )
                 )
             } while (cursor.moveToNext())

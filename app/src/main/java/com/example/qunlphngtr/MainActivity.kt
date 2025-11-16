@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> true
                 R.id.nav_bill -> {
+                    startActivity(Intent(this, BillActivity::class.java))
                     overridePendingTransition(0, 0)
                     true
                 }

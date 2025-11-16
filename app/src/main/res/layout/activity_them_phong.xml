@@ -48,6 +48,14 @@
             android:background="@android:drawable/edit_text"
             android:layout_marginTop="12dp" />
 
+        <!-- Spinner chọn người thuê -->
+        <Spinner
+            android:id="@+id/spinnerTenant"
+            android:layout_width="match_parent"
+            android:layout_height="58dp"
+            android:layout_marginTop="12dp"
+            android:background="@android:drawable/edit_text" />
+
         <!-- Chỗ chọn ảnh -->
         <ImageView
             android:id="@+id/imgPhong"

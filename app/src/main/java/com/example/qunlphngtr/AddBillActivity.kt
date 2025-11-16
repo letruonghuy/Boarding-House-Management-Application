@@ -1,13 +1,22 @@
 package com.example.qunlphngtr
 
+import android.Manifest
 import android.app.DatePickerDialog
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.widget.EditText
+import android.view.View
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.qunlphngtr.dao.BillDao
 import com.example.qunlphngtr.dao.RoomDao
 import com.example.qunlphngtr.model.Room
@@ -28,6 +37,13 @@ class AddBillActivity : AppCompatActivity() {
     private lateinit var etRoomPrice: TextInputEditText
     private lateinit var etNote: TextInputEditText
 
+    // --- Image Views ---
+    private lateinit var ivNewElectric: ImageView
+    private lateinit var btnAddNewElectricImage: ImageButton
+    private lateinit var ivNewWater: ImageView
+    private lateinit var btnAddNewWaterImage: ImageButton
+
+
     // Summary Table Views
     private lateinit var tvElectricQuantity: TextView
     private lateinit var tvElectricPrice: TextView
@@ -46,13 +62,62 @@ class AddBillActivity : AppCompatActivity() {
     private lateinit var billDao: BillDao
     private lateinit var roomDao: RoomDao
     private var selectedDateString = ""
+    private var electricImageUri: Uri? = null
+    private var waterImageUri: Uri? = null
 
-    // Hardcoded prices (can be moved to a settings screen later)
+    // --- State Management for Image Picking ---
+    private enum class ImageType { ELECTRIC, WATER }
+    private var currentImageType: ImageType = ImageType.ELECTRIC
+
+    // --- Calculated Values ---
+    private var elecUsage: Int = 0
+    private var waterUsage: Int = 0
+    private var elecTotal: Double = 0.0
+    private var waterTotal: Double = 0.0
+    private var roomFee: Double = 0.0
+    private var grandTotal: Double = 0.0
+
+    // Hardcoded prices
     private val ELECTRICITY_PRICE = 4000.0
-    private val WATER_PRICE = 100000.0 // Assuming this is price per m³, adjust if needed
+    private val WATER_PRICE = 100000.0
 
     private val locale = Locale("vi", "VN")
     private val currencyFormat = NumberFormat.getCurrencyInstance(locale)
+
+
+    // --- LAUNCHERS ---
+
+    // Launcher for picking an image from the gallery
+    private val pickImageLauncher: ActivityResultLauncher<String> =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                when (currentImageType) {
+                    ImageType.ELECTRIC -> {
+                        electricImageUri = it
+                        ivNewElectric.setImageURI(it)
+                        ivNewElectric.visibility = View.VISIBLE
+                        btnAddNewElectricImage.visibility = View.GONE
+                    }
+                    ImageType.WATER -> {
+                        waterImageUri = it
+                        ivNewWater.setImageURI(it)
+                        ivNewWater.visibility = View.VISIBLE
+                        btnAddNewWaterImage.visibility = View.GONE
+                    }
+                }
+            }
+        }
+
+    // Launcher for requesting a permission from the user
+    private val requestPermissionLauncher: ActivityResultLauncher<String> =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                pickImageLauncher.launch("image/*")
+            } else {
+                Toast.makeText(this, "Quyền truy cập thư viện ảnh đã bị từ chối.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,7 +143,7 @@ class AddBillActivity : AppCompatActivity() {
         bindViews()
         setupStaticData()
         setupListeners()
-        calculateTotals() // Initial calculation
+        calculateTotals()
     }
 
     private fun bindViews() {
@@ -91,7 +156,11 @@ class AddBillActivity : AppCompatActivity() {
         etRoomPrice = findViewById(R.id.etRoomPrice)
         etNote = findViewById(R.id.etNote)
 
-        // Summary Table
+        ivNewElectric = findViewById(R.id.ivNewElectric)
+        btnAddNewElectricImage = findViewById(R.id.btnAddNewElectricImage)
+        ivNewWater = findViewById(R.id.ivNewWater) // Assuming this ID exists in your XML
+        btnAddNewWaterImage = findViewById(R.id.btnAddNewWaterImage) // Assuming this ID exists
+
         tvElectricQuantity = findViewById(R.id.tvElectricQuantity)
         tvElectricPrice = findViewById(R.id.tvElectricPrice)
         tvElectricTotal = findViewById(R.id.tvElectricTotal)
@@ -101,7 +170,6 @@ class AddBillActivity : AppCompatActivity() {
         tvRoomPriceDisplay = findViewById(R.id.tvRoomPriceDisplay)
         tvRoomTotal = findViewById(R.id.tvRoomTotal)
         tvGrandTotal = findViewById(R.id.tvGrandTotal)
-
         btnApproveInvoice = findViewById(R.id.btnApproveInvoice)
     }
 
@@ -132,7 +200,32 @@ class AddBillActivity : AppCompatActivity() {
         etRoomPrice.addTextChangedListener(textWatcher)
 
         btnApproveInvoice.setOnClickListener { saveBill() }
+
+        btnAddNewElectricImage.setOnClickListener {
+            currentImageType = ImageType.ELECTRIC
+            openGallery()
+        }
+
+        btnAddNewWaterImage.setOnClickListener {
+            currentImageType = ImageType.WATER
+            openGallery()
+        }
     }
+
+    private fun openGallery() {
+        val requiredPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_IMAGES
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
+        if (ContextCompat.checkSelfPermission(this, requiredPermission) == PackageManager.PERMISSION_GRANTED) {
+            pickImageLauncher.launch("image/*")
+        } else {
+            requestPermissionLauncher.launch(requiredPermission)
+        }
+    }
+
 
     private fun calculateTotals() {
         val oldElec = etOldElectric.text.toString().toIntOrNull() ?: 0
@@ -140,19 +233,17 @@ class AddBillActivity : AppCompatActivity() {
         val oldWater = etOldWater.text.toString().toIntOrNull() ?: 0
         val newWater = etNewWater.text.toString().toIntOrNull() ?: 0
 
-        val elecUsage = if (newElec > oldElec) newElec - oldElec else 0
-        val waterUsage = if (newWater > oldWater) newWater - oldWater else 0
+        elecUsage = if (newElec > oldElec) newElec - oldElec else 0
+        waterUsage = if (newWater > oldWater) newWater - oldWater else 0
 
-        val elecTotal = elecUsage * ELECTRICITY_PRICE
-        val waterTotal = waterUsage * WATER_PRICE
-        val roomFee = etRoomPrice.text.toString().toDoubleOrNull() ?: 0.0
+        elecTotal = elecUsage * ELECTRICITY_PRICE
+        waterTotal = waterUsage * WATER_PRICE
+        roomFee = etRoomPrice.text.toString().toDoubleOrNull() ?: 0.0
 
-        val grandTotal = elecTotal + waterTotal + roomFee
+        grandTotal = elecTotal + waterTotal + roomFee
 
-        // Update summary table
         tvElectricQuantity.text = elecUsage.toString()
         tvWaterQuantity.text = waterUsage.toString()
-
         tvElectricTotal.text = formatCurrency(elecTotal)
         tvWaterTotal.text = formatCurrency(waterTotal)
         tvRoomPriceDisplay.text = formatCurrency(roomFee)
@@ -182,34 +273,33 @@ class AddBillActivity : AppCompatActivity() {
         }
 
         selectedRoom?.let { room ->
-            val oldElec = etOldElectric.text.toString().toIntOrNull() ?: 0
-            val newElec = etNewElectric.text.toString().toIntOrNull() ?: 0
-            val elecUsage = if (newElec > oldElec) newElec - oldElec else 0
-            val elecTotal = elecUsage * ELECTRICITY_PRICE
+            val tenantId = room.tenantId
+            if (tenantId == null || tenantId <= 0) {
+                Toast.makeText(this, "Không thể tạo hóa đơn cho phòng trống.", Toast.LENGTH_SHORT).show()
+                return
+            }
 
-            val oldWater = etOldWater.text.toString().toIntOrNull() ?: 0
-            val newWater = etNewWater.text.toString().toIntOrNull() ?: 0
-            val waterUsage = if (newWater > oldWater) newWater - oldWater else 0
-            val waterTotal = waterUsage * WATER_PRICE
+            try {
+                val result = billDao.insertBill(
+                    month = selectedDateString,
+                    electric = elecTotal,
+                    water = waterTotal,
+                    roomFee = roomFee,
+                    internet = 0.0,
+                    tenantId = tenantId,
+                    roomId = room.id
+                )
 
-            val roomFee = etRoomPrice.text.toString().toDoubleOrNull() ?: 0.0
-
-            val result = billDao.insertBill(
-                month = selectedDateString,
-                electric = elecTotal,
-                water = waterTotal,
-                roomFee = roomFee,
-                internet = 0.0, // No internet field in the new layout
-                roomId = room.id,
-                tenantId = -1 // tenantId is not available, using -1 as placeholder
-            )
-
-            if (result > 0) {
-                Toast.makeText(this, "Tạo hóa đơn thành công!", Toast.LENGTH_SHORT).show()
-                setResult(RESULT_OK)
-                finish()
-            } else {
-                Toast.makeText(this, "Tạo hóa đơn thất bại!", Toast.LENGTH_SHORT).show()
+                if (result > 0) {
+                    Toast.makeText(this, "Tạo hóa đơn thành công!", Toast.LENGTH_SHORT).show()
+                    setResult(RESULT_OK)
+                    finish()
+                } else {
+                    Toast.makeText(this, "Tạo hóa đơn thất bại! Có thể hóa đơn đã tồn tại cho tháng này.", Toast.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this, "Tạo hóa đơn thất bại! Lỗi: ${e.message}", Toast.LENGTH_LONG).show()
+                e.printStackTrace()
             }
         }
     }

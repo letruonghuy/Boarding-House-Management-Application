@@ -19,9 +19,21 @@ class RoomAdapter(
     inner class RoomViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.tvRoomName)
         val imgRoom: ImageView = itemView.findViewById(R.id.imgRoom)
+        val tvStatus: TextView = itemView.findViewById(R.id.tvStatus)
+        val tvDescription: TextView = itemView.findViewById(R.id.tvDescription)
 
         fun bind(room: Room) {
             tvName.text = room.name
+            tvDescription.text = room.description
+
+            // Cập nhật trạng thái và màu sắc
+            tvStatus.text = "Trạng thái: ${room.status}"
+            if (room.status == "Hết phòng") {
+                tvStatus.setTextColor(itemView.context.getColor(android.R.color.holo_red_dark))
+            } else {
+                tvStatus.setTextColor(itemView.context.getColor(android.R.color.holo_green_dark))
+            }
+
 
             // --- SỬA: Thêm try-catch để chống crash ---
             if (!room.imageUri.isNullOrEmpty()) {

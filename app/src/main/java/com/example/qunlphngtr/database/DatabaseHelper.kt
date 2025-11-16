@@ -9,8 +9,8 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         const val DATABASE_NAME = "boarding_house.db"
-        // tăng version để onUpgrade tạo lại DB với cột mới imageUri
-        const val DATABASE_VERSION = 8
+        // Version 9: Add tenantId to Room table and fix status check constraint
+        const val DATABASE_VERSION = 9
     }
 
     override fun onConfigure(db: SQLiteDatabase) {
@@ -41,9 +41,11 @@ class DatabaseHelper(context: Context) :
                 name TEXT NOT NULL,
                 price REAL,
                 area REAL,
-                status TEXT CHECK(status IN ('available','occupied')) NOT NULL,
+                status TEXT,
                 description TEXT,
-                imageUri TEXT
+                imageUri TEXT,
+                tenantId INTEGER,
+                FOREIGN KEY (tenantId) REFERENCES Tenant(id)
             )
         """)
 
@@ -129,6 +131,8 @@ class DatabaseHelper(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        // This is a destructive migration, it will delete all data.
+        // For development, this is acceptable.
         db.execSQL("DROP TABLE IF EXISTS User")
         db.execSQL("DROP TABLE IF EXISTS Room")
         db.execSQL("DROP TABLE IF EXISTS Tenant")

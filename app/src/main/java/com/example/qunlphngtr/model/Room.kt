@@ -5,7 +5,8 @@ data class Room(
     val name: String,
     val price: Double,
     val area: Double,
-    val status: String,
+    var status: String,
     val description: String,
-    val imageUri: String? = null
+    val imageUri: String? = null,
+    var tenantId: Int? = null // Thêm trường tenantId có thể null
 )
