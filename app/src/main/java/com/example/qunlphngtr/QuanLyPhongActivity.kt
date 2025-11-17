@@ -104,6 +104,18 @@ class QuanLyPhongActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        try {
+            // Reload rooms from DB to reflect any external changes (e.g., tenant assignment)
+            val updated = roomDao.getAllRooms()
+            // Use adapter's filterList to replace data
+            roomAdapter.filterList(updated)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private fun showAddRoomDialog(roomToEdit: Room? = null) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.activity_them_phong)
@@ -235,5 +247,30 @@ class QuanLyPhongActivity : AppCompatActivity() {
         })
 
         itemTouchHelper.attachToRecyclerView(rvRooms)
+    }
+
+    // Receiver to refresh rooms when assignments change elsewhere
+    private val roomsUpdatedReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
+            try {
+                val updated = roomDao.getAllRooms()
+                roomAdapter.filterList(updated)
+            } catch (e: Exception) { e.printStackTrace() }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        try {
+            val filter = android.content.IntentFilter("com.example.qunlphngtr.ACTION_ROOMS_UPDATED")
+            registerReceiver(roomsUpdatedReceiver, filter)
+        } catch (e: Exception) { e.printStackTrace() }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        try {
+            unregisterReceiver(roomsUpdatedReceiver)
+        } catch (e: Exception) { /* ignore */ }
     }
 }

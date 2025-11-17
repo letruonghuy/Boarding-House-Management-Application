@@ -10,6 +10,7 @@ import android.widget.ImageView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 
 class AddTenantActivity : AppCompatActivity() {
 
@@ -31,7 +32,7 @@ class AddTenantActivity : AppCompatActivity() {
         pickImageLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
             uri?.let {
                 selectedImageUri = it
-                imgTenant.setImageURI(it)
+                Glide.with(this).load(it).placeholder(R.drawable.ic_person).into(imgTenant)
                 // try to persist permission so app can read the URI later
                 try {
                     contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)

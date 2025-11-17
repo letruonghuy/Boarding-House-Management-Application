@@ -16,4 +16,10 @@
     <string name="add_room">Thêm phòng</string>
     <string name="chon_phong">Chọn phòng</string>
     <string name="chon_nguoi_thue">Chọn người thuê</string>
+    <string name="status_available_text">Trạng thái: Còn trống</string>
+    <string name="status_occupied_text">Trạng thái: Đã thuê</string>
+
+    <!-- Added resources -->
+    <string name="label_month">Tháng: %s</string>
+    <string name="choose_time">Chọn thời gian</string>
 </resources>

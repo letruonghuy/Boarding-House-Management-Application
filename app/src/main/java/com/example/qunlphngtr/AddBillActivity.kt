@@ -4,12 +4,13 @@ import android.app.DatePickerDialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.qunlphngtr.dao.BillDao
 import com.example.qunlphngtr.dao.RoomDao
+import com.example.qunlphngtr.dao.TenantDao
+import com.example.qunlphngtr.dao.NotificationDao
 import com.example.qunlphngtr.model.Room
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
@@ -45,6 +46,7 @@ class AddBillActivity : AppCompatActivity() {
     private var selectedRoom: Room? = null
     private lateinit var billDao: BillDao
     private lateinit var roomDao: RoomDao
+    private lateinit var tenantDao: TenantDao
     private var selectedDateString = ""
 
     // Hardcoded prices (can be moved to a settings screen later)
@@ -60,6 +62,7 @@ class AddBillActivity : AppCompatActivity() {
 
         billDao = BillDao(this)
         roomDao = RoomDao(this)
+        tenantDao = TenantDao(this)
 
         val roomId = intent.getIntExtra("ROOM_ID", -1)
         if (roomId == -1) {
@@ -167,7 +170,8 @@ class AddBillActivity : AppCompatActivity() {
             { _, year, month, dayOfMonth ->
                 val formattedDate = "$dayOfMonth/${month + 1}/$year"
                 etDate.setText(formattedDate)
-                selectedDateString = String.format("%02d/%d", month + 1, year)
+                // use explicit locale to avoid lint warning
+                selectedDateString = String.format(Locale.getDefault(), "%02d/%d", month + 1, year)
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
@@ -194,6 +198,13 @@ class AddBillActivity : AppCompatActivity() {
 
             val roomFee = etRoomPrice.text.toString().toDoubleOrNull() ?: 0.0
 
+            // Require a tenant to exist for this room before creating a bill
+            val tenant = tenantDao.getTenantByRoomId(room.id)
+            if (tenant == null) {
+                Toast.makeText(this, "Phòng chưa có người thuê, không thể tạo hóa đơn.", Toast.LENGTH_LONG).show()
+                return
+            }
+
             val result = billDao.insertBill(
                 month = selectedDateString,
                 electric = elecTotal,
@@ -201,10 +212,27 @@ class AddBillActivity : AppCompatActivity() {
                 roomFee = roomFee,
                 internet = 0.0, // No internet field in the new layout
                 roomId = room.id,
-                tenantId = -1 // tenantId is not available, using -1 as placeholder
+                tenantId = tenant.id
             )
 
             if (result > 0) {
+                // Create a notification to tenant about this new bill
+                try {
+                    val notificationDao = NotificationDao(this)
+                    val title = "Hóa đơn mới"
+                    val message = "Bạn có hóa đơn cho tháng $selectedDateString. Vui lòng kiểm tra."
+                    val date = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault()).format(java.util.Date())
+                    notificationDao.insertNotification(title, message, "bill", date, tenant.id)
+
+                    // Removed system notification call to avoid permission analysis errors; app shows in-app notifications from DB
+                    // try {
+                    //     val helper = NotificationHelper(this)
+                    //     helper.notifyTenant(tenant.id, title, message)
+                    // } catch (e: Exception) { e.printStackTrace() }
+                } catch (nEx: Exception) {
+                    nEx.printStackTrace()
+                }
+
                 Toast.makeText(this, "Tạo hóa đơn thành công!", Toast.LENGTH_SHORT).show()
                 setResult(RESULT_OK)
                 finish()
