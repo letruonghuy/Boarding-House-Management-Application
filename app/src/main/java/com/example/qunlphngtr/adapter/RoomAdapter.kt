@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import androidx.core.content.ContextCompat
 import com.example.qunlphngtr.R
 import com.example.qunlphngtr.model.Room
 
@@ -22,6 +23,16 @@ class RoomAdapter(
 
         fun bind(room: Room) {
             tvName.text = room.name
+            val tvPrice = itemView.findViewById<TextView>(R.id.tvPrice)
+            val tvStatus = itemView.findViewById<TextView>(R.id.tvStatus)
+
+            // Format price
+            try {
+                val formatted = java.text.NumberFormat.getInstance(java.util.Locale.getDefault()).format(room.price)
+                tvPrice.text = String.format(java.util.Locale.getDefault(), "%s VNĐ", formatted)
+            } catch (e: Exception) {
+                tvPrice.text = String.format(java.util.Locale.getDefault(), "%s VNĐ", room.price)
+            }
 
             // --- SỬA: Thêm try-catch để chống crash ---
             if (!room.imageUri.isNullOrEmpty()) {
@@ -39,6 +50,14 @@ class RoomAdapter(
                 imgRoom.setImageResource(R.drawable.ic_room)
             }
             // --- Kết thúc sửa ---
+            // Set status color
+            if (room.status == "available") {
+                tvStatus.setTextColor(ContextCompat.getColor(itemView.context, R.color.status_available))
+                tvStatus.text = itemView.context.getString(R.string.status_available_text)
+            } else {
+                tvStatus.setTextColor(ContextCompat.getColor(itemView.context, R.color.status_rented))
+                tvStatus.text = itemView.context.getString(R.string.status_occupied_text)
+            }
 
             itemView.setOnClickListener { onItemClick(room) }
         }

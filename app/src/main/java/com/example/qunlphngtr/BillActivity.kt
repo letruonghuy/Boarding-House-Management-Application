@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.qunlphngtr.adapter.BillAdapter
 import com.example.qunlphngtr.dao.BillDao
 import com.example.qunlphngtr.dao.RoomDao
+import com.example.qunlphngtr.dao.TenantDao
 import com.example.qunlphngtr.model.Bill
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.*
@@ -22,6 +23,7 @@ import java.util.*
 class BillActivity : AppCompatActivity() {
     private lateinit var billDao: BillDao
     private lateinit var roomDao: RoomDao
+    private lateinit var tenantDao: TenantDao
     private lateinit var adapter: BillAdapter
     private lateinit var billList: MutableList<Bill>
     private lateinit var etSearch: EditText
@@ -42,6 +44,7 @@ class BillActivity : AppCompatActivity() {
 
         billDao = BillDao(this)
         roomDao = RoomDao(this)
+        tenantDao = TenantDao(this)
         billList = billDao.getAllBills()
 
         val recyclerView = findViewById<RecyclerView>(R.id.rvRooms)
@@ -58,6 +61,22 @@ class BillActivity : AppCompatActivity() {
         val btnAddBill = findViewById<Button>(R.id.btnAddRoom)
         btnAddBill.setOnClickListener {
             showRoomSelectionDialog()
+        }
+
+        val btnGenerateAll = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnGenerateAll)
+        btnGenerateAll.setOnClickListener {
+            // Show DatePicker but only use month/year
+            val calendar = Calendar.getInstance()
+            val dp = DatePickerDialog(this, { _, y, m, _ ->
+                val monthYear = String.format(Locale.getDefault(), "%02d/%d", m + 1, y)
+                val count = billDao.generateMonthlyBills(monthYear)
+                Toast.makeText(this, getString(R.string.label_month, monthYear) + " - Đã tạo $count hóa đơn", Toast.LENGTH_LONG).show()
+                // reload list for that month
+                billList = billDao.getBillsByMonth(monthYear)
+                filter(etSearch.text.toString())
+                tvSelectedMonth.text = getString(R.string.label_month, monthYear)
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
+            dp.show()
         }
 
         etSearch = findViewById(R.id.etSearch)
@@ -81,9 +100,9 @@ class BillActivity : AppCompatActivity() {
             val day = calendar.get(Calendar.DAY_OF_MONTH)
 
             val datePickerDialog = DatePickerDialog(this, { _, selectedYear, selectedMonth, _ ->
-                val selectedDate = String.format("Tháng: %02d/%d", selectedMonth + 1, selectedYear)
-                tvSelectedMonth.text = selectedDate
-                val monthYear = String.format("%02d/%d", selectedMonth + 1, selectedYear)
+                val selectedDate = String.format(Locale.getDefault(), "Tháng: %02d/%d", selectedMonth + 1, selectedYear)
+                tvSelectedMonth.text = getString(R.string.label_month, String.format(Locale.getDefault(), "%02d/%d", selectedMonth + 1, selectedYear))
+                val monthYear = String.format(Locale.getDefault(), "%02d/%d", selectedMonth + 1, selectedYear)
                 val billsForMonth = billDao.getBillsByMonth(monthYear)
                 billList = billsForMonth
                 filter(etSearch.text.toString())
@@ -124,12 +143,20 @@ class BillActivity : AppCompatActivity() {
 
     private fun showRoomSelectionDialog() {
         val rooms = roomDao.getAllRooms()
-        val roomNames = rooms.map { it.name }.toTypedArray()
+        // Only allow rooms that have an assigned tenant
+        val occupiedRooms = rooms.filter { room -> tenantDao.getTenantByRoomId(room.id) != null }
+
+        if (occupiedRooms.isEmpty()) {
+            Toast.makeText(this, "Không có phòng đang có người thuê để tạo hóa đơn.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val roomNames = occupiedRooms.map { it.name }.toTypedArray()
 
         AlertDialog.Builder(this)
             .setTitle("Chọn phòng để tạo hóa đơn")
             .setItems(roomNames) { dialog, which ->
-                val selectedRoomId = rooms[which].id
+                val selectedRoomId = occupiedRooms[which].id
                 val intent = Intent(this, AddBillActivity::class.java)
                 intent.putExtra("ROOM_ID", selectedRoomId)
                 addBillLauncher.launch(intent)
@@ -149,7 +176,7 @@ class BillActivity : AppCompatActivity() {
 
     private fun reloadList() {
         billList = billDao.getAllBills()
-        tvSelectedMonth.text = "Chọn thời gian"
+        tvSelectedMonth.text = getString(R.string.choose_time)
         filter(etSearch.text.toString())
     }
 }

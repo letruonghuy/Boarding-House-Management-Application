@@ -1,5 +1,6 @@
 package com.example.qunlphngtr
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.LinearLayout
@@ -7,6 +8,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import com.google.android.material.button.MaterialButton
+import android.widget.TextView
+import com.example.qunlphngtr.dao.BillDao
+import com.example.qunlphngtr.dao.TenantDao
+import java.util.Locale
 
 class TenantHomeActivity : AppCompatActivity() {
 
@@ -23,10 +28,87 @@ class TenantHomeActivity : AppCompatActivity() {
         setupBottomNavigation()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Refresh quick view when returning to home (for example after payment)
+        try {
+            val tvBillAmount = findViewById<TextView>(R.id.tvBillAmount)
+            val tvBillDueDate = findViewById<TextView>(R.id.tvBillDueDate)
+            val prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+            val currentUserId = prefs.getInt("user_id", -1)
+            if (currentUserId != -1) {
+                val tenantDao = TenantDao(this)
+                val tenant = tenantDao.getTenantByUserId(currentUserId)
+                if (tenant != null) {
+                    val billDao = BillDao(this)
+                    val latest = billDao.getLatestBillForTenant(tenant.id)
+                    if (latest != null) {
+                        tvBillAmount.text = String.format(Locale.getDefault(), "%,.0f VNĐ", latest.total)
+                        tvBillDueDate.text = "Hạn chót: ${latest.month}"
+                    } else {
+                        tvBillAmount.text = "Không có hóa đơn"
+                        tvBillDueDate.text = ""
+                    }
+                }
+            }
+        } catch (e: Exception) { e.printStackTrace() }
+    }
+
     private fun setupHomeEvents() {
-        // Nút trong thẻ xem nhanh
-        findViewById<MaterialButton>(R.id.btnPayNow).setOnClickListener {
-            Toast.makeText(this, "Mở trang thanh toán", Toast.LENGTH_SHORT).show()
+        // Nút trong thẻ xem nhanh: lấy hóa đơn mới nhất của tenant và mở chi tiết
+        val btnPayNow = findViewById<MaterialButton>(R.id.btnPayNow)
+        val tvBillAmount = findViewById<TextView>(R.id.tvBillAmount)
+        val tvBillDueDate = findViewById<TextView>(R.id.tvBillDueDate)
+
+        // Cập nhật quick view ngay khi mở
+        try {
+            val prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+            val currentUserId = prefs.getInt("user_id", -1)
+            if (currentUserId != -1) {
+                val tenantDao = TenantDao(this)
+                val tenant = tenantDao.getTenantByUserId(currentUserId)
+                if (tenant != null) {
+                    val billDao = BillDao(this)
+                    val latest = billDao.getLatestBillForTenant(tenant.id)
+                    if (latest != null) {
+                        tvBillAmount.text = String.format("%,.0f VNĐ", latest.total)
+                        tvBillDueDate.text = "Hạn chót: ${latest.month}" // month currently stored as MM/yyyy
+                    } else {
+                        tvBillAmount.text = "Không có hóa đơn"
+                        tvBillDueDate.text = ""
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        btnPayNow.setOnClickListener {
+            val prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+            val currentUserId = prefs.getInt("user_id", -1)
+            if (currentUserId == -1) {
+                Toast.makeText(this, "Vui lòng đăng nhập", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val tenantDao = TenantDao(this)
+            val tenant = tenantDao.getTenantByUserId(currentUserId)
+            if (tenant == null) {
+                Toast.makeText(this, "Không tìm thấy thông tin người thuê", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val billDao = BillDao(this)
+            val latest = billDao.getLatestBillForTenant(tenant.id)
+            if (latest == null) {
+                Toast.makeText(this, "Không có hóa đơn để thanh toán", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Mở BillDetailActivity để xem và thanh toán
+            val intent = Intent(this, BillDetailActivity::class.java)
+            intent.putExtra("invoice_id", latest.id)
+            startActivity(intent)
         }
 
         // 4 nút trong Grid

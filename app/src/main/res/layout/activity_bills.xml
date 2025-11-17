@@ -82,6 +82,17 @@
         android:layout_weight="1"
         android:layout_marginTop="12dp" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGenerateAll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tạo hóa đơn hàng loạt"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="12dp"
+        app:cornerRadius="12dp"
+        app:backgroundTint="@color/blue" />
+
     <!-- Nút thêm phòng -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAddRoom"

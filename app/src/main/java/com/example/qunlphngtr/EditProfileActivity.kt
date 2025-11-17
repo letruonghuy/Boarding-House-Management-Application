@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -30,7 +31,8 @@ class EditProfileActivity : AppCompatActivity() {
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            imgProfile.setImageURI(it)
+            // Use Glide to avoid issues with content URIs on some devices
+            Glide.with(this).load(it).placeholder(R.drawable.ic_users).into(imgProfile)
         }
     }
 
