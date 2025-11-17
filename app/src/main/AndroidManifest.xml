@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- Permission needed for posting notifications on Android 13+ -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -25,7 +25,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".LoginActivity" android:exported="true" />
         <activity android:name=".RegisterActivity" android:exported="true" />
         <activity android:name=".QuanLyPhongActivity" android:exported="true" />
@@ -40,10 +39,11 @@
         <activity android:name=".AddBillActivity" android:exported="true" />
         <activity android:name=".EditProfileActivity" android:exported="true" />
         <activity android:name=".TenantHomeActivity" android:exported="true" />
+        <activity android:name=".AssignTenantActivity" android:exported="true" />
+        <activity android:name=".ReportsAdminActivity" android:exported="true" />
+        <activity android:name=".ReportDetailActivity" android:exported="true" />
+        <activity android:name=".BroadcastActivity" android:exported="true" />
         <activity android:name=".ProfileUserActivity" />
         <activity android:name=".NotificationsActivity" />
-
-
     </application>
-
 </manifest>

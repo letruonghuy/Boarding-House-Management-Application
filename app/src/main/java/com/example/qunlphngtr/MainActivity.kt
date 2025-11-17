@@ -1,14 +1,21 @@
 package com.example.qunlphngtr
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
 
 class MainActivity : AppCompatActivity() {
+    private val REQUEST_POST_NOTIFICATIONS = 1001
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -31,6 +38,13 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, TenantHomeActivity::class.java))
             finish()
             return // Dừng hàm onCreate ở đây
+        }
+
+        // Request notification permission on Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQUEST_POST_NOTIFICATIONS)
+            }
         }
 
         // --- NẾU BẠN THẤY MÀN HÌNH NÀY, BẠN LÀ LANDLORD ---
@@ -82,6 +96,17 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, BillActivity::class.java)
             startActivity(intent)
 
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_POST_NOTIFICATIONS) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Cho phép gửi thông báo", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Quyền thông báo bị từ chối. Ứng dụng sẽ chỉ lưu thông báo trong app.", Toast.LENGTH_LONG).show()
+            }
         }
     }
 }

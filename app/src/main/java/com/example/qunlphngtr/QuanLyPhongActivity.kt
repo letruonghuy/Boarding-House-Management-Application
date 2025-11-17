@@ -10,7 +10,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.*
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts // Đảm bảo import đúng
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -18,24 +18,26 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.qunlphngtr.adapter.RoomAdapter
 import com.example.qunlphngtr.dao.RoomDao
-import com.example.qunlphngtr.dao.TenantDao // Import TenantDao
 import com.example.qunlphngtr.model.Room
-import com.example.qunlphngtr.model.Tenant // Import Tenant
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class QuanLyPhongActivity : AppCompatActivity() {
 
     private lateinit var roomDao: RoomDao
-    private lateinit var tenantDao: TenantDao // Add TenantDao
     private lateinit var roomAdapter: RoomAdapter
     private lateinit var rvRooms: RecyclerView
     private var selectedImageUri: Uri? = null
     private var imgPhong: ImageView? = null
 
+    // --- SỬA 1: Đổi GetContent thành OpenDocument ---
+    // OpenDocument cho phép chúng ta lấy quyền truy cập dài hạn
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         if (uri != null) {
+            // --- SỬA 2: Lấy quyền truy cập dài hạn ---
+            // Dòng này rất quan trọng. Nó yêu cầu hệ thống cho phép ứng dụng
+            // của bạn đọc URI này vĩnh viễn (cho đến khi app bị gỡ cài đặt).
             try {
                 contentResolver.takePersistableUriPermission(
                     uri,
@@ -55,7 +57,6 @@ class QuanLyPhongActivity : AppCompatActivity() {
         setContentView(R.layout.activity_room_list)
 
         roomDao = RoomDao(this)
-        tenantDao = TenantDao(this) // Initialize TenantDao
         rvRooms = findViewById(R.id.rvRooms)
         rvRooms.layoutManager = LinearLayoutManager(this)
 
@@ -83,22 +84,35 @@ class QuanLyPhongActivity : AppCompatActivity() {
                 when (item.itemId) {
                     R.id.nav_home -> true
                     R.id.nav_bill -> {
-                        val intent = Intent(this, AddBillActivity::class.java)
-                        startActivity(intent)
+                        // Giả sử bạn có BillActivity
+                        // val intent = Intent(this, BillActivity::class.java)
+                        // startActivity(intent)
                         overridePendingTransition(0, 0)
-                        finish()
+                        finish() // Đóng màn hình này
                         true
                     }
                     R.id.nav_settings -> {
                         val intent = Intent(this, SettingsActivity::class.java)
                         startActivity(intent)
                         overridePendingTransition(0, 0)
-                        finish()
+                        finish() // Đóng màn hình này
                         true
                     }
                     else -> false
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        try {
+            // Reload rooms from DB to reflect any external changes (e.g., tenant assignment)
+            val updated = roomDao.getAllRooms()
+            // Use adapter's filterList to replace data
+            roomAdapter.filterList(updated)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -109,47 +123,28 @@ class QuanLyPhongActivity : AppCompatActivity() {
         val edtTenPhong = dialog.findViewById<EditText>(R.id.edtTenPhong)
         val edtGiaPhong = dialog.findViewById<EditText>(R.id.edtGiaPhong)
         val edtDienTich = dialog.findViewById<EditText>(R.id.edtDienTich)
-        val spinnerTenant = dialog.findViewById<Spinner>(R.id.spinnerTenant) // Get Spinner
         imgPhong = dialog.findViewById(R.id.imgPhong)
         val btnChonAnh = dialog.findViewById<Button>(R.id.btnChonAnh)
         val btnLuu = dialog.findViewById<Button>(R.id.btnLuu)
         val btnHuy = dialog.findViewById<Button>(R.id.btnHuy)
 
-        // --- SETUP SPINNER ---
-        val tenants = tenantDao.getAllTenants().toMutableList()
-        // Create a fake tenant for the "Empty" option
-        val emptyTenant = Tenant(id = -1, name = "Để trống", phone = "", gender = "")
-        tenants.add(0, emptyTenant)
-
-        // Use a simple string array adapter
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tenants.map { it.name })
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerTenant.adapter = adapter
-        // ---------------------
-
+        // Reset biến global khi mở dialog
         selectedImageUri = null
 
         if (roomToEdit != null) {
             edtTenPhong.setText(roomToEdit.name)
             edtGiaPhong.setText(roomToEdit.price.toString())
             edtDienTich.setText(roomToEdit.area.toString())
-
-            // Set spinner selection
-            val tenantPosition = tenants.indexOfFirst { it.id == roomToEdit.tenantId }
-            if (tenantPosition >= 0) {
-                spinnerTenant.setSelection(tenantPosition)
-            } else {
-                spinnerTenant.setSelection(0) // Select "Để trống" if tenant not found or null
-            }
-
+            // Lưu URI từ DB vào `selectedImageUri` để nếu không chọn ảnh mới, nó vẫn giữ ảnh cũ
             selectedImageUri = roomToEdit.imageUri?.let { Uri.parse(it) }
             selectedImageUri?.let { imgPhong?.setImageURI(it) }
         } else {
-            spinnerTenant.setSelection(0) // Default to "Để trống" for new room
-            imgPhong?.setImageResource(R.drawable.ic_room)
+            imgPhong?.setImageResource(R.drawable.ic_room) // Đặt ảnh mặc định (nếu có)
         }
 
         btnChonAnh.setOnClickListener {
+            // --- SỬA 3: Thay đổi cách gọi launch ---
+            // OpenDocument yêu cầu một mảng các kiểu MIME
             pickImageLauncher.launch(arrayOf("image/*"))
         }
 
@@ -163,42 +158,20 @@ class QuanLyPhongActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Get selected tenant from spinner
-            val selectedTenantPosition = spinnerTenant.selectedItemPosition
-            val selectedTenant = tenants[selectedTenantPosition]
-
-            val newTenantId: Int?
-            val newStatus: String
-
-            if (selectedTenant.id == -1) { // "Để trống" is selected
-                newTenantId = null
-                newStatus = "Còn phòng"
-            } else {
-                newTenantId = selectedTenant.id
-                newTenantId != null
-                newStatus = "Hết phòng"
-            }
-
-
+            // Xác định URI cuối cùng để lưu
             val finalImageUri: String? = if (selectedImageUri != null) {
+                // Người dùng đã chọn ảnh mới (hoặc giữ ảnh cũ)
                 selectedImageUri.toString()
             } else if (roomToEdit != null) {
+                // Người dùng không chọn ảnh mới, giữ nguyên ảnh cũ
                 roomToEdit.imageUri
             } else {
+                // Thêm phòng mới và không chọn ảnh
                 null
             }
 
             if (roomToEdit == null) {
-                val newRoom = Room(
-                    id = 0,
-                    name = name,
-                    price = price,
-                    area = area,
-                    status = newStatus, // Set status
-                    description = "Chưa có mô tả",
-                    imageUri = finalImageUri,
-                    tenantId = newTenantId // Set tenantId
-                )
+                val newRoom = Room(0, name, price, area, "available", "Chưa có mô tả", finalImageUri)
                 val id = roomDao.insertRoom(newRoom)
                 if (id > 0) {
                     roomAdapter.addRoom(newRoom.copy(id = id.toInt()))
@@ -206,12 +179,8 @@ class QuanLyPhongActivity : AppCompatActivity() {
                 }
             } else {
                 val updated = roomToEdit.copy(
-                    name = name,
-                    price = price,
-                    area = area,
-                    imageUri = finalImageUri,
-                    status = newStatus, // Update status
-                    tenantId = newTenantId // Update tenantId
+                    name = name, price = price, area = area,
+                    imageUri = finalImageUri
                 )
                 roomDao.updateRoom(updated)
                 roomAdapter.updateRoom(updated)
@@ -246,7 +215,7 @@ class QuanLyPhongActivity : AppCompatActivity() {
                     val result = roomDao.deleteRoom(room.id)
                     if (result > 0) roomAdapter.removeRoom(room)
                 } else if (direction == ItemTouchHelper.RIGHT) {
-                    roomAdapter.notifyItemChanged(position)
+                    roomAdapter.notifyItemChanged(position) // Vẽ lại item
                     showAddRoomDialog(room)
                 }
             }
@@ -261,12 +230,12 @@ class QuanLyPhongActivity : AppCompatActivity() {
                 val paint = Paint()
                 val background = ColorDrawable()
 
-                if (dX > 0) {
+                if (dX > 0) { // vuốt phải -> sửa
                     paint.color = Color.parseColor("#4CAF50")
                     background.color = paint.color
                     background.setBounds(itemView.left, itemView.top, itemView.left + dX.toInt(), itemView.bottom)
                     background.draw(c)
-                } else if (dX < 0) {
+                } else if (dX < 0) { // vuốt trái -> xóa
                     paint.color = Color.parseColor("#F44336")
                     background.color = paint.color
                     background.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
@@ -278,5 +247,30 @@ class QuanLyPhongActivity : AppCompatActivity() {
         })
 
         itemTouchHelper.attachToRecyclerView(rvRooms)
+    }
+
+    // Receiver to refresh rooms when assignments change elsewhere
+    private val roomsUpdatedReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
+            try {
+                val updated = roomDao.getAllRooms()
+                roomAdapter.filterList(updated)
+            } catch (e: Exception) { e.printStackTrace() }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        try {
+            val filter = android.content.IntentFilter("com.example.qunlphngtr.ACTION_ROOMS_UPDATED")
+            registerReceiver(roomsUpdatedReceiver, filter)
+        } catch (e: Exception) { e.printStackTrace() }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        try {
+            unregisterReceiver(roomsUpdatedReceiver)
+        } catch (e: Exception) { /* ignore */ }
     }
 }

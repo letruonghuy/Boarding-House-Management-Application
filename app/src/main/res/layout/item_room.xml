@@ -39,12 +39,21 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tvPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2.000.000 VNĐ"
+                android:textColor="@color/blue"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp" />
+
+            <TextView
                 android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Trạng thái: Còn trống"
-                android:textColor="@android:color/holo_green_dark"
-                android:textSize="14sp" />
+                android:textSize="13sp"
+                android:textColor="@android:color/holo_green_dark" />
 
             <TextView
                 android:id="@+id/tvDescription"
@@ -53,8 +62,6 @@
                 android:text="Có ban công, 25m², gần chợ"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="13sp" />
-
-
 
 
         </LinearLayout>
