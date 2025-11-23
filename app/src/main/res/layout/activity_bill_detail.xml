@@ -1,54 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     android:orientation="vertical"
-    android:padding="16dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@android:color/white">
+    android:padding="16dp">
 
-    <!-- Tiêu đề -->
+    <!-- Title and Status -->
     <TextView
-        android:id="@+id/tvTitle"
+        android:id="@+id/tvBillTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hóa đơn"
+        android:textColor="@android:color/black"
         android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black" />
+        android:textStyle="bold" />
 
+    <TextView
+        android:id="@+id/tvBillStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Chưa thanh toán"
+        android:textSize="16sp"
+        android:textStyle="italic" />
 
-    <LinearLayout
-        android:id="@+id/btnSelectMonth"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="8dp"
-        android:background="@drawable/btn_rounded"
-        android:layout_marginTop="12dp">
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_calendar"
-            app:tint="@android:color/white"
-            android:layout_marginEnd="8dp"/>
-
-
-        <TextView
-            android:id="@+id/tvSelectedMonth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Chọn thời gian"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:textStyle="bold"/>
-    </LinearLayout>
-
-
-
-    <!-- CardView chứa chi tiết hóa đơn -->
+    <!-- Bill Details Card -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -62,105 +41,117 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Tiêu đề hóa đơn -->
-            <TextView
-                android:id="@+id/tvInvoiceDetailTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Hóa đơn tháng 6"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:layout_marginBottom="12dp"/>
-
-            <!-- Các dòng chi phí -->
+            <!-- Cost Items -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingVertical="6dp">
+                android:paddingVertical="8dp">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Tiền điện"
-                    android:textSize="14sp" />
+                    android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/tvElectric"
+                    android:id="@+id/tvElectricCost"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="100.000đ"
-                    android:textSize="14sp"
-                    android:textStyle="bold"/>
+                    android:text="0đ"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingVertical="6dp">
+                android:paddingVertical="8dp">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Tiền nước"
-                    android:textSize="14sp" />
+                    android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/tvWater"
+                    android:id="@+id/tvWaterCost"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="110.000đ"
-                    android:textSize="14sp"
-                    android:textStyle="bold"/>
+                    android:text="0đ"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingVertical="6dp">
+                android:paddingVertical="8dp">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Tiền phòng"
-                    android:textSize="14sp" />
+                    android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/tvRoom"
+                    android:id="@+id/tvRoomFee"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="2.400.000đ"
-                    android:textSize="14sp"
-                    android:textStyle="bold"/>
+                    android:text="0đ"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingVertical="6dp">
+                android:paddingVertical="8dp">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Internet"
-                    android:textSize="14sp" />
+                    android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/tvInternet"
+                    android:id="@+id/tvInternetFee"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="80.000đ"
-                    android:textSize="14sp"
-                    android:textStyle="bold"/>
+                    android:text="0đ"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginVertical="8dp"
+                android:background="@android:color/darker_gray" />
+
+            <!-- Total Amount -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -171,28 +162,93 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Tổng tiền"
-                    android:textSize="14sp" />
+                    android:text="Tổng cộng"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/sumBill"
+                    android:id="@+id/tvTotalAmount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="3.000.000đ"
-                    android:textSize="14sp"
-                    android:textStyle="bold"/>
+                    android:text="0đ"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- Nút Thanh toán -->
-            <Button
-                android:id="@+id/btnPay"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="+ Thanh toán"
-                android:layout_marginTop="16dp"
-                android:backgroundTint="@android:color/holo_blue_light"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
+    <!-- Payment Proof Layout -->
+    <LinearLayout
+        android:id="@+id/layoutProof"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bằng chứng thanh toán"
+            android:textStyle="bold"
+            android:textSize="16sp"/>
+
+        <ImageView
+            android:id="@+id/ivProof"
+            android:layout_width="120dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerCrop"
+            tools:src="@tools:sample/backgrounds/scenic"/>
+    </LinearLayout>
+
+    <!-- Spacer to push buttons to the bottom -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Admin's Confirmation Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAdminConfirm"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Xác nhận thanh toán"
+        app:backgroundTint="@color/blue"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <!-- Tenant's Payment Options -->
+    <LinearLayout
+        android:id="@+id/tenantPaymentOptions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPayByCash"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="Báo trả tiền mặt" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPayByTransfer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            app:backgroundTint="@color/blue"
+            android:text="Chuyển khoản" />
+    </LinearLayout>
+
 </LinearLayout>

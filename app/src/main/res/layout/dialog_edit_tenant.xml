@@ -36,17 +36,17 @@
         android:layout_height="wrap_content"
         android:inputType="textPersonName"/>
 
-    <EditText
-        android:id="@+id/edtGender"
-        android:hint="Giới tính"
+    <!-- Gender spinner -->
+    <Spinner
+        android:id="@+id/spinnerGender"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="text"/>
+        android:layout_marginTop="8dp" />
 
     <EditText
         android:id="@+id/edtPhone"
         android:hint="Số điện thoại"
-        android:inputType="phone"
+        android:inputType="number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
@@ -62,7 +62,49 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Nhập số CMND/CCCD"
-        android:inputType="text" />
+        android:inputType="number" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ảnh CCCD mặt trước"
+        android:layout_marginTop="12dp" />
+
+    <ImageView
+        android:id="@+id/imgCccdFront"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_person" />
+
+    <Button
+        android:id="@+id/btnChooseCccdFront"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chọn ảnh CCCD mặt trước"
+        android:backgroundTint="@color/blue"
+        android:textColor="#FFFFFF"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ảnh CCCD mặt sau"
+        android:layout_marginTop="12dp" />
+
+    <ImageView
+        android:id="@+id/imgCccdBack"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_person" />
+
+    <Button
+        android:id="@+id/btnChooseCccdBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chọn ảnh CCCD mặt sau"
+        android:backgroundTint="@color/blue"
+        android:textColor="#FFFFFF"/>
 
     <TextView
         android:layout_width="wrap_content"

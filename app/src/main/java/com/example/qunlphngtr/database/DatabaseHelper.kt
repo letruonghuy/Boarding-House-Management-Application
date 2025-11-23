@@ -9,8 +9,8 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         const val DATABASE_NAME = "boarding_house.db"
-        // Version 9: Add tenantId to Room table and fix status check constraint
-        const val DATABASE_VERSION = 9
+        // Version 14: Add Contract table
+        const val DATABASE_VERSION = 14
     }
 
     override fun onConfigure(db: SQLiteDatabase) {
@@ -27,13 +27,6 @@ class DatabaseHelper(context: Context) :
                 role TEXT CHECK(role IN ('landlord', 'tenant')) NOT NULL
             )
         """)
-        // --- BƯỚC 1: THÊM TÀI KHOẢN CHỦ TRỌ MẶC ĐỊNH ---
-        // Thêm một tài khoản
-        db.execSQL("""
-            INSERT INTO User (username, password, role) 
-            VALUES ('chutro', '123456', 'landlord')
-        """)
-        //
 
         db.execSQL("""
             CREATE TABLE Room (
@@ -61,6 +54,8 @@ class DatabaseHelper(context: Context) :
                 start_date TEXT,
                 end_date TEXT,
                 user_id INTEGER,
+                cccd_front_uri TEXT,
+                cccd_back_uri TEXT,
                 FOREIGN KEY (room_id) REFERENCES Room(id),
                 FOREIGN KEY (user_id) REFERENCES User(id)
             )
@@ -78,28 +73,32 @@ class DatabaseHelper(context: Context) :
                 status TEXT,
                 room_id INTEGER,
                 tenant_id INTEGER,
+                old_electric_image_uri TEXT,
+                new_electric_image_uri TEXT,
+                old_water_image_uri TEXT,
+                new_water_image_uri TEXT,
+                old_electric_reading INTEGER DEFAULT 0,
+                new_electric_reading INTEGER DEFAULT 0,
+                old_water_reading INTEGER DEFAULT 0,
+                new_water_reading INTEGER DEFAULT 0,
+                payment_proof_uri TEXT,
                 FOREIGN KEY (room_id) REFERENCES Room(id),
                 FOREIGN KEY (tenant_id) REFERENCES Tenant(id)
             )
         """)
 
         db.execSQL("""
-            CREATE TABLE Service (
+            CREATE TABLE Contract (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT,
-                price REAL
-            )
-        """)
-
-        db.execSQL("""
-            CREATE TABLE Bill_Service (
-                bill_id INTEGER,
-                service_id INTEGER,
-                quantity INTEGER,
-                subtotal REAL,
-                PRIMARY KEY (bill_id, service_id),
-                FOREIGN KEY (bill_id) REFERENCES Bill(id),
-                FOREIGN KEY (service_id) REFERENCES Service(id)
+                tenant_id INTEGER NOT NULL,
+                room_id INTEGER NOT NULL,
+                start_date TEXT NOT NULL,
+                end_date TEXT NOT NULL,
+                rent_price REAL NOT NULL,
+                deposit_amount REAL NOT NULL,
+                contract_pdf_uri TEXT,
+                FOREIGN KEY (tenant_id) REFERENCES Tenant(id),
+                FOREIGN KEY (room_id) REFERENCES Room(id)
             )
         """)
 
@@ -131,16 +130,36 @@ class DatabaseHelper(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // This is a destructive migration, it will delete all data.
-        // For development, this is acceptable.
-        db.execSQL("DROP TABLE IF EXISTS User")
-        db.execSQL("DROP TABLE IF EXISTS Room")
-        db.execSQL("DROP TABLE IF EXISTS Tenant")
-        db.execSQL("DROP TABLE IF EXISTS Bill")
-        db.execSQL("DROP TABLE IF EXISTS Service")
-        db.execSQL("DROP TABLE IF EXISTS Bill_Service")
-        db.execSQL("DROP TABLE IF EXISTS Notification")
-        db.execSQL("DROP TABLE IF EXISTS Report")
-        onCreate(db)
+        if (oldVersion < 11) {
+            db.execSQL("ALTER TABLE Bill ADD COLUMN old_electric_image_uri TEXT")
+            db.execSQL("ALTER TABLE Bill ADD COLUMN new_electric_image_uri TEXT")
+            db.execSQL("ALTER TABLE Bill ADD COLUMN old_water_image_uri TEXT")
+            db.execSQL("ALTER TABLE Bill ADD COLUMN new_water_image_uri TEXT")
+        }
+        if (oldVersion < 12) {
+            db.execSQL("ALTER TABLE Bill ADD COLUMN old_electric_reading INTEGER DEFAULT 0")
+            db.execSQL("ALTER TABLE Bill ADD COLUMN new_electric_reading INTEGER DEFAULT 0")
+            db.execSQL("ALTER TABLE Bill ADD COLUMN old_water_reading INTEGER DEFAULT 0")
+            db.execSQL("ALTER TABLE Bill ADD COLUMN new_water_reading INTEGER DEFAULT 0")
+        }
+        if (oldVersion < 13) {
+            db.execSQL("ALTER TABLE Bill ADD COLUMN payment_proof_uri TEXT")
+        }
+        if (oldVersion < 14) {
+            db.execSQL("""
+                CREATE TABLE Contract (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    tenant_id INTEGER NOT NULL,
+                    room_id INTEGER NOT NULL,
+                    start_date TEXT NOT NULL,
+                    end_date TEXT NOT NULL,
+                    rent_price REAL NOT NULL,
+                    deposit_amount REAL NOT NULL,
+                    contract_pdf_uri TEXT,
+                    FOREIGN KEY (tenant_id) REFERENCES Tenant(id),
+                    FOREIGN KEY (room_id) REFERENCES Room(id)
+                )
+            """)
+        }
     }
 }

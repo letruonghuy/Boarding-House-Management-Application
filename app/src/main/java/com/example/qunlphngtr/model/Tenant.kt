@@ -11,5 +11,8 @@ data class Tenant(
     val room_id: Int?,
     val start_date: String?,
     val end_date: String?,
-    val user_id: Int?
+    val user_id: Int?,
+    // CCCD/CMND images (mặt trước và mặt sau)
+    val cccd_front_uri: String? = null,
+    val cccd_back_uri: String? = null
 )

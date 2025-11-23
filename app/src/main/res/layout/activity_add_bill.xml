@@ -11,12 +11,12 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Header Card với số phòng -->
+        <!-- Header Card with room number -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardBackgroundColor="#FFB3B3"
+            app:cardBackgroundColor="#2196F3"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp">
 
@@ -44,7 +44,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Ngày -->
+                <!-- Date -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
                         android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Thông tin điện nước cũ -->
+                <!-- Old electric/water info -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -86,7 +86,6 @@
                     android:layout_marginTop="12dp"
                     android:orientation="horizontal">
 
-                    <!-- Số điện cũ -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -113,17 +112,8 @@
                                 android:hint="0"
                                 android:inputType="number" />
                         </com.google.android.material.textfield.TextInputLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="1/6"
-                            android:textColor="#666666"
-                            android:textSize="12sp" />
                     </LinearLayout>
 
-                    <!-- Số nước cũ -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -150,25 +140,16 @@
                                 android:hint="0"
                                 android:inputType="number" />
                         </com.google.android.material.textfield.TextInputLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="1/6"
-                            android:textColor="#666666"
-                            android:textSize="12sp" />
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- Hình điện cũ và nước cũ -->
+                <!-- Old electric/water images -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:orientation="horizontal">
 
-                    <!-- Hình điện cũ -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -207,7 +188,6 @@
                         </FrameLayout>
                     </LinearLayout>
 
-                    <!-- Hình nước cũ -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -247,7 +227,7 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- Thông tin điện nước mới -->
+                <!-- New electric/water info -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -263,7 +243,6 @@
                     android:layout_marginTop="12dp"
                     android:orientation="horizontal">
 
-                    <!-- Số điện mới -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -290,17 +269,8 @@
                                 android:hint="0"
                                 android:inputType="number" />
                         </com.google.android.material.textfield.TextInputLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="1/6"
-                            android:textColor="#666666"
-                            android:textSize="12sp" />
                     </LinearLayout>
 
-                    <!-- Số nước mới -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -327,25 +297,16 @@
                                 android:hint="0"
                                 android:inputType="number" />
                         </com.google.android.material.textfield.TextInputLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="1/6"
-                            android:textColor="#666666"
-                            android:textSize="12sp" />
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- Hình điện mới và nước mới -->
+                <!-- New electric/water images -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:orientation="horizontal">
 
-                    <!-- Hình điện mới -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -384,7 +345,6 @@
                         </FrameLayout>
                     </LinearLayout>
 
-                    <!-- Hình nước mới -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -424,12 +384,12 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- Tiện dịch vụ thêm -->
+                <!-- Dịch vụ thêm -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
-                    android:text="Tiện dịch vụ thêm"
+                    android:text="Dịch vụ thêm"
                     android:textColor="#000000"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -453,6 +413,28 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="5,000,000"
+                        android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Tiền Internet -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Tiền Internet"
+                    android:textColor="#000000"
+                    android:textSize="14sp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etInternetPrice"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="100,000"
                         android:inputType="number" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -498,7 +480,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Số"
+                            android:text="Dịch vụ"
                             android:textColor="#000000"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -508,7 +490,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:gravity="center"
-                            android:text="Giá"
+                            android:text="Số lượng/Giá"
                             android:textColor="#000000"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -518,7 +500,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:gravity="end"
-                            android:text="Tiền"
+                            android:text="Thành tiền"
                             android:textColor="#000000"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -543,19 +525,9 @@
                             android:id="@+id/tvElectricQuantity"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="0.5"
+                            android:layout_weight="1"
                             android:gravity="center"
-                            android:text="0"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/tvElectricPrice"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="0.75"
-                            android:gravity="center"
-                            android:text="4,000"
+                            android:text="0 kWh"
                             android:textColor="#333333"
                             android:textSize="14sp" />
 
@@ -563,7 +535,7 @@
                             android:id="@+id/tvElectricTotal"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="0.75"
+                            android:layout_weight="1"
                             android:gravity="end"
                             android:text="0"
                             android:textColor="#333333"
@@ -589,19 +561,9 @@
                             android:id="@+id/tvWaterQuantity"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="0.5"
+                            android:layout_weight="1"
                             android:gravity="center"
-                            android:text="0"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/tvWaterPrice"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="0.75"
-                            android:gravity="center"
-                            android:text="100,000"
+                            android:text="0 m³"
                             android:textColor="#333333"
                             android:textSize="14sp" />
 
@@ -609,7 +571,7 @@
                             android:id="@+id/tvWaterTotal"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="0.75"
+                            android:layout_weight="1"
                             android:gravity="end"
                             android:text="0"
                             android:textColor="#333333"
@@ -632,20 +594,10 @@
                             android:textSize="14sp" />
 
                         <TextView
-                            android:id="@+id/tvRoomQuantity"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="0.5"
-                            android:gravity="center"
-                            android:text="1"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
-
-                        <TextView
                             android:id="@+id/tvRoomPriceDisplay"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="0.75"
+                            android:layout_weight="1"
                             android:gravity="center"
                             android:text="5,000,000"
                             android:textColor="#333333"
@@ -655,9 +607,45 @@
                             android:id="@+id/tvRoomTotal"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="0.75"
+                            android:layout_weight="1"
                             android:gravity="end"
                             android:text="5,000,000"
+                            android:textColor="#333333"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <!-- Tiền Internet -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Tiền Internet"
+                            android:textColor="#333333"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/tvInternetPriceDisplay"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="100,000"
+                            android:textColor="#333333"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/tvInternetTotal"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="end"
+                            android:text="100,000"
                             android:textColor="#333333"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -688,7 +676,7 @@
                             android:id="@+id/tvGrandTotal"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="5,000,000"
+                            android:text="5,100,000"
                             android:textColor="#000000"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -701,6 +689,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:layout_marginTop="24dp"
+                    app:backgroundTint="#2196F3"
                     android:text="Tạo hóa đơn"
                     android:textAllCaps="false"
                     android:textSize="16sp"

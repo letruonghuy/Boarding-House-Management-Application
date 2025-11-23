@@ -28,13 +28,10 @@
         android:focusable="true"
         android:foreground="?android:attr/selectableItemBackground">
 
-        <!-- Icon hình người -->
         <ImageView
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@android:drawable/ic_menu_myplaces"
-
-
             />
 
         <TextView
@@ -45,13 +42,67 @@
             android:textColor="@android:color/black" />
     </LinearLayout>
 
-    <!-- Bottom Navigation -->
+    <!-- Dòng Thông tin thanh toán -->
+    <LinearLayout
+        android:id="@+id/btnPaymentInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnAccountInfo"
+        android:orientation="horizontal"
+        android:padding="20dp"
+        android:gravity="center_vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_edit"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="  Thông tin thanh toán"
+            android:textSize="20sp"
+            android:textColor="@android:color/black" />
+    </LinearLayout>
+
+    <!-- Dòng Đăng xuất -->
+    <LinearLayout
+        android:id="@+id/btnLogout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnPaymentInfo"
+        android:orientation="horizontal"
+        android:padding="20dp"
+        android:gravity="center_vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_lock_power_off"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="  Đăng xuất"
+            android:textSize="20sp"
+            android:textColor="@color/red" />
+    </LinearLayout>
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="110dp"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/bottom_nav_background"
+        android:background="?android:attr/windowBackground"
         app:menu="@menu/bottom_nav_menu"
-        android:elevation="0dp" />
+        app:itemIconSize="40dp"
+        />
 </RelativeLayout>

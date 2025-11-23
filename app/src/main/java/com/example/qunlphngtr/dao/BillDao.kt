@@ -5,76 +5,51 @@ import android.content.Context
 import android.database.Cursor
 import com.example.qunlphngtr.database.DatabaseHelper
 import com.example.qunlphngtr.model.Bill
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class BillDao(private val context: Context) {
     private val dbHelper = DatabaseHelper(context)
-    private val notificationDao = NotificationDao(context)
 
-    // tenantId can be null (room may be vacant) -> handle putNull
-    fun insertBill(month: String, electric: Double, water: Double, roomFee: Double, internet: Double, roomId: Int, tenantId: Int?): Long {
-        val total = electric + water + roomFee + internet
+    fun insertBill(bill: Bill): Long {
         val db = dbHelper.writableDatabase
-        val values = ContentValues().apply {
-            put("month", month)
-            put("electric", electric)
-            put("water", water)
-            put("roomFee", roomFee)
-            put("internet", internet)
-            put("total", total)
-            put("room_id", roomId)
-            if (tenantId != null) put("tenant_id", tenantId) else putNull("tenant_id")
-            put("status", "unpaid")
-        }
+        val values = billToContentValues(bill)
         val id = db.insert("Bill", null, values)
         db.close()
         return id
     }
 
+    fun updateBill(bill: Bill): Int {
+        val db = dbHelper.writableDatabase
+        val values = billToContentValues(bill)
+        val result = db.update("Bill", values, "id = ?", arrayOf(bill.id.toString()))
+        db.close()
+        return result
+    }
+
     fun getAllBills(): MutableList<Bill> {
         val bills = mutableListOf<Bill>()
         val db = dbHelper.readableDatabase
-        val cursor: Cursor = db.rawQuery("SELECT b.id, b.month, b.electric, b.water, b.roomFee, b.internet, b.total, b.room_id, b.tenant_id, b.status, r.name as roomName FROM Bill b JOIN Room r ON b.room_id = r.id ORDER BY b.id DESC", null)
+        val cursor: Cursor = db.rawQuery("SELECT b.*, r.name as roomName FROM Bill b JOIN Room r ON b.room_id = r.id ORDER BY b.id DESC", null)
         if (cursor.moveToFirst()) {
             do {
-                val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
-                val month = cursor.getString(cursor.getColumnIndexOrThrow("month"))
-                val electric = cursor.getDouble(cursor.getColumnIndexOrThrow("electric"))
-                val water = cursor.getDouble(cursor.getColumnIndexOrThrow("water"))
-                val roomFee = cursor.getDouble(cursor.getColumnIndexOrThrow("roomFee"))
-                val internet = cursor.getDouble(cursor.getColumnIndexOrThrow("internet"))
-                val total = cursor.getDouble(cursor.getColumnIndexOrThrow("total"))
-                val roomId = cursor.getInt(cursor.getColumnIndexOrThrow("room_id"))
-                val tenantId = cursor.getInt(cursor.getColumnIndexOrThrow("tenant_id"))
-                val roomName = cursor.getString(cursor.getColumnIndexOrThrow("roomName"))
-                val status = cursor.getString(cursor.getColumnIndexOrThrow("status"))
-
-                bills.add(Bill(id, month, electric, water, roomFee, internet, total, roomId, tenantId, roomName, status))
+                bills.add(cursorToBill(cursor))
             } while (cursor.moveToNext())
         }
         cursor.close()
         db.close()
         return bills
     }
+
     fun getBillsByMonth(monthYear: String): MutableList<Bill> {
         val bills = mutableListOf<Bill>()
         val db = dbHelper.readableDatabase
-        val query = "SELECT b.id, b.month, b.electric, b.water, b.roomFee, b.internet, b.total, b.room_id, b.tenant_id, b.status, r.name as roomName FROM Bill b JOIN Room r ON b.room_id = r.id WHERE b.month = ? ORDER BY b.id DESC"
+        val query = "SELECT b.*, r.name as roomName FROM Bill b JOIN Room r ON b.room_id = r.id WHERE b.month = ? ORDER BY b.id DESC"
         val cursor: Cursor = db.rawQuery(query, arrayOf(monthYear))
         if (cursor.moveToFirst()) {
             do {
-                val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
-                val month = cursor.getString(cursor.getColumnIndexOrThrow("month"))
-                val electric = cursor.getDouble(cursor.getColumnIndexOrThrow("electric"))
-                val water = cursor.getDouble(cursor.getColumnIndexOrThrow("water"))
-                val roomFee = cursor.getDouble(cursor.getColumnIndexOrThrow("roomFee"))
-                val internet = cursor.getDouble(cursor.getColumnIndexOrThrow("internet"))
-                val total = cursor.getDouble(cursor.getColumnIndexOrThrow("total"))
-                val roomId = cursor.getInt(cursor.getColumnIndexOrThrow("room_id"))
-                val tenantId = cursor.getInt(cursor.getColumnIndexOrThrow("tenant_id"))
-                val roomName = cursor.getString(cursor.getColumnIndexOrThrow("roomName"))
-                val status = cursor.getString(cursor.getColumnIndexOrThrow("status"))
-
-                bills.add(Bill(id, month, electric, water, roomFee, internet, total, roomId, tenantId, roomName, status))
+                bills.add(cursorToBill(cursor))
             } while (cursor.moveToNext())
         }
         cursor.close()
@@ -82,104 +57,74 @@ class BillDao(private val context: Context) {
         return bills
     }
 
-
     fun getBillById(id: Int): Bill? {
         val db = dbHelper.readableDatabase
-        val cursor = db.rawQuery("SELECT b.id, b.month, b.electric, b.water, b.roomFee, b.internet, b.total, b.room_id, b.tenant_id, b.status, r.name as roomName FROM Bill b JOIN Room r ON b.room_id = r.id WHERE b.id = ?", arrayOf(id.toString()))
+        val cursor = db.rawQuery("SELECT b.*, r.name as roomName FROM Bill b JOIN Room r ON b.room_id = r.id WHERE b.id = ?", arrayOf(id.toString()))
         var bill: Bill? = null
         if (cursor.moveToFirst()) {
-            val iid = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
-            val month = cursor.getString(cursor.getColumnIndexOrThrow("month"))
-            val electric = cursor.getDouble(cursor.getColumnIndexOrThrow("electric"))
-            val water = cursor.getDouble(cursor.getColumnIndexOrThrow("water"))
-            val roomFee = cursor.getDouble(cursor.getColumnIndexOrThrow("roomFee"))
-            val internet = cursor.getDouble(cursor.getColumnIndexOrThrow("internet"))
-            val total = cursor.getDouble(cursor.getColumnIndexOrThrow("total"))
-            val roomId = cursor.getInt(cursor.getColumnIndexOrThrow("room_id"))
-            val tenantId = cursor.getInt(cursor.getColumnIndexOrThrow("tenant_id"))
-            val roomName = cursor.getString(cursor.getColumnIndexOrThrow("roomName"))
-            val status = cursor.getString(cursor.getColumnIndexOrThrow("status"))
-            bill = Bill(iid, month, electric, water, roomFee, internet, total, roomId, tenantId, roomName, status)
+            bill = cursorToBill(cursor)
         }
         cursor.close()
         db.close()
         return bill
     }
 
-    // Lấy hóa đơn mới nhất cho 1 tenant (theo id giảm dần)
     fun getLatestBillForTenant(tenantId: Int): Bill? {
         val db = dbHelper.readableDatabase
-        val query = "SELECT b.id, b.month, b.electric, b.water, b.roomFee, b.internet, b.total, b.room_id, b.tenant_id, b.status, r.name as roomName FROM Bill b JOIN Room r ON b.room_id = r.id WHERE b.tenant_id = ? ORDER BY b.id DESC LIMIT 1"
+        val query = "SELECT b.*, r.name as roomName FROM Bill b JOIN Room r ON b.room_id = r.id WHERE b.tenant_id = ? ORDER BY b.id DESC LIMIT 1"
         val cursor: Cursor = db.rawQuery(query, arrayOf(tenantId.toString()))
         var bill: Bill? = null
         if (cursor.moveToFirst()) {
-            val iid = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
-            val month = cursor.getString(cursor.getColumnIndexOrThrow("month"))
-            val electric = cursor.getDouble(cursor.getColumnIndexOrThrow("electric"))
-            val water = cursor.getDouble(cursor.getColumnIndexOrThrow("water"))
-            val roomFee = cursor.getDouble(cursor.getColumnIndexOrThrow("roomFee"))
-            val internet = cursor.getDouble(cursor.getColumnIndexOrThrow("internet"))
-            val total = cursor.getDouble(cursor.getColumnIndexOrThrow("total"))
-            val roomId = cursor.getInt(cursor.getColumnIndexOrThrow("room_id"))
-            val tenant = cursor.getInt(cursor.getColumnIndexOrThrow("tenant_id"))
-            val roomName = cursor.getString(cursor.getColumnIndexOrThrow("roomName"))
-            val status = cursor.getString(cursor.getColumnIndexOrThrow("status"))
-            bill = Bill(iid, month, electric, water, roomFee, internet, total, roomId, tenant, roomName, status)
+            bill = cursorToBill(cursor)
         }
         cursor.close()
         db.close()
         return bill
     }
 
-    // Generate bills for all tenants who have a room assignment for a given month (e.g., "11/2025")
     fun generateMonthlyBills(monthYear: String): Int {
         val db = dbHelper.writableDatabase
         var inserted = 0
         try {
             db.beginTransaction()
-            // Select tenants who have room_id not null and join with room to get price
             val cursor = db.rawQuery(
                 "SELECT t.id as tenantId, r.id as roomId, r.price FROM Tenant t JOIN Room r ON t.room_id = r.id WHERE t.room_id IS NOT NULL",
                 null
             )
             if (cursor.moveToFirst()) {
+                val notificationDao = NotificationDao(context)
                 do {
                     val tenantId = cursor.getInt(cursor.getColumnIndexOrThrow("tenantId"))
                     val roomId = cursor.getInt(cursor.getColumnIndexOrThrow("roomId"))
                     val roomFee = cursor.getDouble(cursor.getColumnIndexOrThrow("price"))
+                    val internetFee = 100000.0
+                    val total = roomFee + internetFee
 
                     val values = ContentValues().apply {
                         put("month", monthYear)
                         put("electric", 0.0)
                         put("water", 0.0)
                         put("roomFee", roomFee)
-                        put("internet", 0.0)
-                        put("total", roomFee)
+                        put("internet", internetFee)
+                        put("total", total)
                         put("status", "unpaid")
                         put("room_id", roomId)
                         put("tenant_id", tenantId)
                     }
+
                     val id = db.insert("Bill", null, values)
-                    if (id != -1L) inserted++
-
-                    // Create a notification for this tenant to inform them a bill was created
-                    try {
-                        val title = "Hóa đơn mới"
-                        val message = "Bạn có hóa đơn cho tháng $monthYear. Vui lòng kiểm tra."
-                        val date = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault()).format(java.util.Date())
-                        notificationDao.insertNotification(title, message, "bill", date, tenantId)
-
-                        // Removed system notification call to avoid permission/analysis issues
-                        // try {
-                        //     val helper = com.example.qunlphngtr.NotificationHelper(context)
-                        //     helper.notifyTenant(tenantId, title, message, tenantId)
-                        // } catch (n2: Exception) {
-                        //     n2.printStackTrace()
-                        // }
-                    } catch (nEx: Exception) {
-                        // Notification failure shouldn't stop bill creation; just log
-                        nEx.printStackTrace()
+                    if (id != -1L) {
+                        inserted++
+                        try {
+                            val title = "Hóa đơn mới"
+                            val message = "Bạn có hóa đơn cho tháng $monthYear. Vui lòng kiểm tra."
+                            val date = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+                            notificationDao.insertNotification(title, message, "bill", date, tenantId)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                     }
+
                 } while (cursor.moveToNext())
             }
             cursor.close()
@@ -203,6 +148,17 @@ class BillDao(private val context: Context) {
         return result
     }
 
+    fun updateBillStatusAndProof(id: Int, status: String, proofUri: String): Int {
+        val db = dbHelper.writableDatabase
+        val values = ContentValues().apply {
+            put("status", status)
+            put("payment_proof_uri", proofUri)
+        }
+        val result = db.update("Bill", values, "id = ?", arrayOf(id.toString()))
+        db.close()
+        return result
+    }
+
     fun deleteBill(id: Int): Int {
         val db = dbHelper.writableDatabase
         val result = db.delete("Bill", "id = ?", arrayOf(id.toString()))
@@ -210,4 +166,56 @@ class BillDao(private val context: Context) {
         return result
     }
 
+    private fun billToContentValues(bill: Bill): ContentValues {
+        return ContentValues().apply {
+            put("month", bill.month)
+            put("electric", bill.electric)
+            put("water", bill.water)
+            put("roomFee", bill.roomFee)
+            put("internet", bill.internet)
+            put("total", bill.total)
+            put("status", bill.status)
+            put("room_id", bill.roomId)
+            put("tenant_id", bill.tenantId)
+            put("old_electric_reading", bill.oldElectricReading)
+            put("new_electric_reading", bill.newElectricReading)
+            put("old_water_reading", bill.oldWaterReading)
+            put("new_water_reading", bill.newWaterReading)
+            put("old_electric_image_uri", bill.oldElectricImageUri)
+            put("new_electric_image_uri", bill.newElectricImageUri)
+            put("old_water_image_uri", bill.oldWaterImageUri)
+            put("new_water_image_uri", bill.newWaterImageUri)
+            put("payment_proof_uri", bill.paymentProofUri)
+        }
+    }
+
+    private fun cursorToBill(cursor: Cursor): Bill {
+        fun getStringOrNull(cursor: Cursor, columnName: String): String? {
+            val index = cursor.getColumnIndex(columnName)
+            return if (index != -1 && !cursor.isNull(index)) cursor.getString(index) else null
+        }
+
+        return Bill(
+            id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+            month = cursor.getString(cursor.getColumnIndexOrThrow("month")),
+            electric = cursor.getDouble(cursor.getColumnIndexOrThrow("electric")),
+            water = cursor.getDouble(cursor.getColumnIndexOrThrow("water")),
+            roomFee = cursor.getDouble(cursor.getColumnIndexOrThrow("roomFee")),
+            internet = cursor.getDouble(cursor.getColumnIndexOrThrow("internet")),
+            total = cursor.getDouble(cursor.getColumnIndexOrThrow("total")),
+            roomId = cursor.getInt(cursor.getColumnIndexOrThrow("room_id")),
+            tenantId = cursor.getInt(cursor.getColumnIndexOrThrow("tenant_id")),
+            roomName = cursor.getString(cursor.getColumnIndexOrThrow("roomName")),
+            status = cursor.getString(cursor.getColumnIndexOrThrow("status")),
+            oldElectricReading = cursor.getInt(cursor.getColumnIndexOrThrow("old_electric_reading")),
+            newElectricReading = cursor.getInt(cursor.getColumnIndexOrThrow("new_electric_reading")),
+            oldWaterReading = cursor.getInt(cursor.getColumnIndexOrThrow("old_water_reading")),
+            newWaterReading = cursor.getInt(cursor.getColumnIndexOrThrow("new_water_reading")),
+            oldElectricImageUri = getStringOrNull(cursor, "old_electric_image_uri"),
+            newElectricImageUri = getStringOrNull(cursor, "new_electric_image_uri"),
+            oldWaterImageUri = getStringOrNull(cursor, "old_water_image_uri"),
+            newWaterImageUri = getStringOrNull(cursor, "new_water_image_uri"),
+            paymentProofUri = getStringOrNull(cursor, "payment_proof_uri")
+        )
+    }
 }

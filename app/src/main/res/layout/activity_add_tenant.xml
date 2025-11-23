@@ -35,7 +35,7 @@
         <!-- Nhập thông tin người thuê -->
         <EditText
             android:id="@+id/edtName"
-            android:hint="Tên người thuê"
+            android:hint="Tên người thuê (*)"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -43,23 +43,106 @@
             android:backgroundTint="#2196F3"
             android:inputType="textPersonName" />
 
-        <EditText
-            android:id="@+id/edtGender"
-            android:hint="Giới tính"
+        <!-- Spinner giới tính -->
+        <Spinner
+            android:id="@+id/spinnerGender"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="#2196F3"
-            android:inputType="text" />
+            android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/edtPhone"
-            android:hint="Số điện thoại"
-            android:inputType="phone"
+            android:hint="Số điện thoại (10 chữ số)"
+            android:inputType="number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="8dp"
             android:backgroundTint="#2196F3" />
+
+        <!-- CCCD -->
+        <EditText
+            android:id="@+id/edtIdentity"
+            android:hint="Số CCCD/CMND (max 12 chữ số)"
+            android:inputType="number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="#2196F3" />
+
+        <!-- CCCD images -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ảnh CCCD mặt trước"
+            android:layout_marginTop="8dp" />
+
+        <ImageView
+            android:id="@+id/imgCccdFront"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_person"
+            android:adjustViewBounds="true"
+            android:contentDescription="CCCD front" />
+
+        <Button
+            android:id="@+id/btnChooseCccdFront"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chọn ảnh CCCD mặt trước"
+            android:backgroundTint="@color/blue"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ảnh CCCD mặt sau"
+            android:layout_marginTop="8dp" />
+
+        <ImageView
+            android:id="@+id/imgCccdBack"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_person"
+            android:adjustViewBounds="true"
+            android:contentDescription="CCCD back" />
+
+        <Button
+            android:id="@+id/btnChooseCccdBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chọn ảnh CCCD mặt sau"
+            android:backgroundTint="@color/blue"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Ngày bắt đầu thuê -->
+        <EditText
+            android:id="@+id/edtStartDate"
+            android:hint="Ngày bắt đầu thuê"
+            android:focusable="false"
+            android:clickable="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="#2196F3" />
+
+        <!-- Spinner chọn phòng -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Chọn phòng (chỉ hiển thị phòng trống)"
+            android:textSize="12sp"
+            android:layout_marginStart="4dp"/>
+        <Spinner
+            android:id="@+id/spinnerRooms"
+            android:layout_width="match_parent"
+            android:layout_height="58dp"
+            android:layout_marginBottom="16dp"/>
+
 
         <!-- Nút lưu -->
         <Button
