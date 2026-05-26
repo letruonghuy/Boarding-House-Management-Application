@@ -29,6 +29,29 @@ class RoomDao(context: Context) {
         return id
     }
 
+    fun getRoomById(roomId: Int): Room? {
+        val db = dbHelper.readableDatabase
+        val cursor = db.query("Room", null, "id = ?", arrayOf(roomId.toString()), null, null, null)
+        var room: Room? = null
+        if (cursor.moveToFirst()) {
+            val tenantIdIndex = cursor.getColumnIndex("tenantId")
+            val tenantId = if (tenantIdIndex != -1 && !cursor.isNull(tenantIdIndex)) cursor.getInt(tenantIdIndex) else null
+            room = Room(
+                id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                name = cursor.getString(cursor.getColumnIndexOrThrow("name")),
+                price = cursor.getDouble(cursor.getColumnIndexOrThrow("price")),
+                area = cursor.getDouble(cursor.getColumnIndexOrThrow("area")),
+                status = cursor.getString(cursor.getColumnIndexOrThrow("status")),
+                description = cursor.getString(cursor.getColumnIndexOrThrow("description")),
+                imageUri = cursor.getString(cursor.getColumnIndexOrThrow("imageUri")),
+                tenantId = tenantId
+            )
+        }
+        cursor.close()
+        db.close()
+        return room
+    }
+
     fun getAllRooms(): List<Room> {
         val rooms = mutableListOf<Room>()
         val db = dbHelper.readableDatabase

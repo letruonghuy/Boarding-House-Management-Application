@@ -105,7 +105,7 @@ class AssignTenantActivity : AppCompatActivity() {
         val rows = tenantDao.updateTenant(updatedTenant)
         if (rows > 0) {
             // Update room status to occupied
-            roomDao.updateRoom(room.copy(status = "occupied"))
+            roomDao.updateRoom(room.copy(status = "occupied", tenantId = tenant.id))
             Toast.makeText(this, "Gán người thuê thành công", Toast.LENGTH_SHORT).show()
             finish()
         } else {
@@ -113,4 +113,3 @@ class AssignTenantActivity : AppCompatActivity() {
         }
     }
 }
-

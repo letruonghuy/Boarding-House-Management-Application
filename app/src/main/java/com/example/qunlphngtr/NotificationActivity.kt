@@ -50,7 +50,9 @@ class NotificationActivity : AppCompatActivity() {
     }
 
     private fun loadNotificationsForLandlord() {
+/*
         notificationList = notificationDao.getNotificationsForLandlord()
+*/
         adapter = NotificationAdapter(notificationList)
         findViewById<RecyclerView>(R.id.rvNotifications).adapter = adapter
         adapter.onItemClick = { notification ->
@@ -63,7 +65,7 @@ class NotificationActivity : AppCompatActivity() {
     }
 
     private fun loadNotificationsForTenant(tenantId: Int) {
-        notificationList = notificationDao.getNotificationsForTenant(tenantId)
+        /*notificationList = notificationDao.getNotificationsForTenant(tenantId)*/
         adapter = NotificationAdapter(notificationList)
         findViewById<RecyclerView>(R.id.rvNotifications).adapter = adapter
         adapter.onItemClick = { notification ->

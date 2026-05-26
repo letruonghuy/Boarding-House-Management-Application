@@ -49,11 +49,16 @@ class AddBillActivity : AppCompatActivity() {
     private lateinit var btnAddOldWaterImage: ImageButton
     private lateinit var btnAddNewWaterImage: ImageButton
 
+    // Calculation Table Views
     private lateinit var tvElectricQuantity: TextView
+    private lateinit var tvElectricUnitPrice: TextView
     private lateinit var tvElectricTotal: TextView
     private lateinit var tvWaterQuantity: TextView
+    private lateinit var tvWaterUnitPrice: TextView
     private lateinit var tvWaterTotal: TextView
+    private lateinit var tvRoomUnitPrice: TextView
     private lateinit var tvRoomTotal: TextView
+    private lateinit var tvInternetUnitPrice: TextView
     private lateinit var tvInternetTotal: TextView
     private lateinit var tvGrandTotal: TextView
 
@@ -61,7 +66,6 @@ class AddBillActivity : AppCompatActivity() {
 
     // --- Data ---
     private var selectedRoom: Room? = null
-    private var existingBill: Bill? = null
     private lateinit var billDao: BillDao
     private lateinit var roomDao: RoomDao
     private lateinit var tenantDao: TenantDao
@@ -72,33 +76,24 @@ class AddBillActivity : AppCompatActivity() {
     private var newElectricImageUri: Uri? = null
     private var oldWaterImageUri: Uri? = null
     private var newWaterImageUri: Uri? = null
+    private var currentImagePicker: ImageView? = null
 
-    private lateinit var pickImageLauncher: ActivityResultLauncher<Array<String>>
-    private var currentImageView: ImageView? = null
+    private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
 
     private val ELECTRICITY_PRICE_PER_UNIT = 4000.0
-    private val WATER_PRICE_PER_UNIT = 100000.0
-
-    private val locale = Locale("vi", "VN")
-    private val currencyFormat = NumberFormat.getCurrencyInstance(locale)
+    private val WATER_PRICE_PER_UNIT = 20000.0
+    private val INTERNET_PRICE = 100000.0
+    private val currencyFormat = NumberFormat.getCurrencyInstance(Locale("vi", "VN"))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_bill)
 
-        billDao = BillDao(this)
-        roomDao = RoomDao(this)
-        tenantDao = TenantDao(this)
-        notificationDao = NotificationDao(this)
+        initDaos()
+        initImagePicker()
 
-        if (intent.hasExtra("BILL_ID")) {
-            val billId = intent.getIntExtra("BILL_ID", -1)
-            existingBill = billDao.getBillById(billId)
-            selectedRoom = roomDao.getAllRooms().find { it.id == existingBill?.roomId }
-        } else if (intent.hasExtra("ROOM_ID")) {
-            val roomId = intent.getIntExtra("ROOM_ID", -1)
-            selectedRoom = roomDao.getAllRooms().find { it.id == roomId }
-        }
+        val roomId = intent.getIntExtra("ROOM_ID", -1)
+        selectedRoom = roomDao.getRoomById(roomId)
 
         if (selectedRoom == null) {
             Toast.makeText(this, "Lỗi: Không tìm thấy phòng!", Toast.LENGTH_SHORT).show()
@@ -106,27 +101,37 @@ class AddBillActivity : AppCompatActivity() {
             return
         }
 
-        setupImagePicker()
         bindViews()
         setupStaticData()
         setupListeners()
         calculateTotals()
     }
 
-    private fun setupImagePicker() {
-        pickImageLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
-            uri?.let {
-                try {
-                    contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    when (currentImageView) {
-                        ivOldElectric -> oldElectricImageUri = it
-                        ivNewElectric -> newElectricImageUri = it
-                        ivOldWater -> oldWaterImageUri = it
-                        ivNewWater -> newWaterImageUri = it
+    private fun initDaos() {
+        billDao = BillDao(this)
+        roomDao = RoomDao(this)
+        tenantDao = TenantDao(this)
+        notificationDao = NotificationDao(this)
+    }
+
+    private fun initImagePicker() {
+        imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val uri = result.data?.data
+                uri?.let {
+                    try {
+                        contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        when (currentImagePicker?.id) {
+                            R.id.ivOldElectric -> oldElectricImageUri = it
+                            R.id.ivNewElectric -> newElectricImageUri = it
+                            R.id.ivOldWater -> oldWaterImageUri = it
+                            R.id.ivNewWater -> newWaterImageUri = it
+                        }
+                        currentImagePicker?.let { imageView -> Glide.with(this).load(it).into(imageView) }
+                    } catch (e: SecurityException) {
+                        e.printStackTrace()
+                        Toast.makeText(this, "Không thể lấy quyền truy cập ảnh", Toast.LENGTH_SHORT).show()
                     }
-                    currentImageView?.let { view -> Glide.with(this).load(it).into(view) }
-                } catch (e: SecurityException) {
-                    e.printStackTrace()
                 }
             }
         }
@@ -152,11 +157,16 @@ class AddBillActivity : AppCompatActivity() {
         btnAddOldWaterImage = findViewById(R.id.btnAddOldWaterImage)
         btnAddNewWaterImage = findViewById(R.id.btnAddNewWaterImage)
 
+        // Calculation Table
         tvElectricQuantity = findViewById(R.id.tvElectricQuantity)
+        tvElectricUnitPrice = findViewById(R.id.tvElectricUnitPrice)
         tvElectricTotal = findViewById(R.id.tvElectricTotal)
         tvWaterQuantity = findViewById(R.id.tvWaterQuantity)
+        tvWaterUnitPrice = findViewById(R.id.tvWaterUnitPrice)
         tvWaterTotal = findViewById(R.id.tvWaterTotal)
+        tvRoomUnitPrice = findViewById(R.id.tvRoomUnitPrice)
         tvRoomTotal = findViewById(R.id.tvRoomTotal)
+        tvInternetUnitPrice = findViewById(R.id.tvInternetUnitPrice)
         tvInternetTotal = findViewById(R.id.tvInternetTotal)
         tvGrandTotal = findViewById(R.id.tvGrandTotal)
 
@@ -164,55 +174,52 @@ class AddBillActivity : AppCompatActivity() {
     }
 
     private fun setupStaticData() {
-        selectedRoom?.let { tvRoomNumber.text = it.name }
+        tvRoomNumber.text = "Tạo hóa đơn cho ${selectedRoom?.name}"
 
-        if (existingBill != null) {
-            title = "Sửa hóa đơn"
-            btnApproveInvoice.text = "Cập nhật hóa đơn"
-            etDate.setText(existingBill!!.month)
-            selectedDateString = existingBill!!.month
-            etRoomPrice.setText(existingBill!!.roomFee.toLong().toString())
-            etInternetPrice.setText(existingBill!!.internet.toLong().toString())
+        val calendar = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        etDate.setText(dateFormat.format(calendar.time))
+        selectedDateString = String.format(Locale.getDefault(), "%02d/%d", calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR))
 
-            etOldElectric.setText(existingBill!!.oldElectricReading.toString())
-            etNewElectric.setText(existingBill!!.newElectricReading.toString())
-            etOldWater.setText(existingBill!!.oldWaterReading.toString())
-            etNewWater.setText(existingBill!!.newWaterReading.toString())
-
-            existingBill!!.oldElectricImageUri?.let { oldElectricImageUri = Uri.parse(it); Glide.with(this).load(it).into(ivOldElectric) }
-            existingBill!!.newElectricImageUri?.let { newElectricImageUri = Uri.parse(it); Glide.with(this).load(it).into(ivNewElectric) }
-            existingBill!!.oldWaterImageUri?.let { oldWaterImageUri = Uri.parse(it); Glide.with(this).load(it).into(ivOldWater) }
-            existingBill!!.newWaterImageUri?.let { newWaterImageUri = Uri.parse(it); Glide.with(this).load(it).into(ivNewWater) }
+        val lastBill = selectedRoom?.let { billDao.getBillsByRoomId(it.id).maxByOrNull { bill -> bill.id } }
+        if (lastBill != null) {
+            etOldElectric.setText(lastBill.newElectricReading.toString())
+            etOldWater.setText(lastBill.newWaterReading.toString())
+            etOldElectric.isEnabled = false
+            etOldWater.isEnabled = false
         } else {
-            title = "Tạo hóa đơn mới"
-            btnApproveInvoice.text = "Tạo hóa đơn"
-            selectedRoom?.let { etRoomPrice.setText(it.price.toLong().toString()) }
-            etInternetPrice.setText("100000") // Mặc định là 100000
+            etOldElectric.isEnabled = true
+            etOldWater.isEnabled = true
         }
     }
 
     private fun setupListeners() {
         etDate.setOnClickListener { showDatePickerDialog() }
-
         val textWatcher = object : TextWatcher {
             override fun afterTextChanged(s: Editable?) { calculateTotals() }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         }
-
-        etOldElectric.addTextChangedListener(textWatcher)
         etNewElectric.addTextChangedListener(textWatcher)
-        etOldWater.addTextChangedListener(textWatcher)
         etNewWater.addTextChangedListener(textWatcher)
         etRoomPrice.addTextChangedListener(textWatcher)
         etInternetPrice.addTextChangedListener(textWatcher)
 
-        btnAddOldElectricImage.setOnClickListener { currentImageView = ivOldElectric; pickImageLauncher.launch(arrayOf("image/*")) }
-        btnAddNewElectricImage.setOnClickListener { currentImageView = ivNewElectric; pickImageLauncher.launch(arrayOf("image/*")) }
-        btnAddOldWaterImage.setOnClickListener { currentImageView = ivOldWater; pickImageLauncher.launch(arrayOf("image/*")) }
-        btnAddNewWaterImage.setOnClickListener { currentImageView = ivNewWater; pickImageLauncher.launch(arrayOf("image/*")) }
+        btnAddOldElectricImage.setOnClickListener { openImagePicker(ivOldElectric) }
+        btnAddNewElectricImage.setOnClickListener { openImagePicker(ivNewElectric) }
+        btnAddOldWaterImage.setOnClickListener { openImagePicker(ivOldWater) }
+        btnAddNewWaterImage.setOnClickListener { openImagePicker(ivNewWater) }
 
         btnApproveInvoice.setOnClickListener { saveBill() }
+    }
+
+    private fun openImagePicker(imageView: ImageView) {
+        currentImagePicker = imageView
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "image/*"
+        }
+        imagePickerLauncher.launch(intent)
     }
 
     private fun calculateTotals() {
@@ -226,138 +233,87 @@ class AddBillActivity : AppCompatActivity() {
 
         val elecUsage = if (newElec >= oldElec) newElec - oldElec else 0
         val waterUsage = if (newWater >= oldWater) newWater - oldWater else 0
+        val roomFee = etRoomPrice.text.toString().toDoubleOrNull() ?: (selectedRoom?.price ?: 0.0)
+        val internetFee = etInternetPrice.text.toString().toDoubleOrNull() ?: INTERNET_PRICE
 
         val elecTotal = elecUsage * ELECTRICITY_PRICE_PER_UNIT
         val waterTotal = waterUsage * WATER_PRICE_PER_UNIT
-        val roomFee = etRoomPrice.text.toString().toDoubleOrNull() ?: 0.0
-        val internetFee = etInternetPrice.text.toString().toDoubleOrNull() ?: 0.0
         val grandTotal = elecTotal + waterTotal + roomFee + internetFee
 
-        tvElectricQuantity.text = "$elecUsage kWh"
-        tvWaterQuantity.text = "$waterUsage m³"
-        tvElectricTotal.text = formatCurrency(elecTotal)
-        tvWaterTotal.text = formatCurrency(waterTotal)
-        tvRoomTotal.text = formatCurrency(roomFee)
-        tvInternetTotal.text = formatCurrency(internetFee)
-        tvGrandTotal.text = formatCurrency(grandTotal)
+        // Update UI
+        tvElectricQuantity.text = elecUsage.toString()
+        tvWaterQuantity.text = waterUsage.toString()
+
+        tvElectricUnitPrice.text = currencyFormat.format(ELECTRICITY_PRICE_PER_UNIT)
+        tvWaterUnitPrice.text = currencyFormat.format(WATER_PRICE_PER_UNIT)
+        tvRoomUnitPrice.text = currencyFormat.format(roomFee)
+        tvInternetUnitPrice.text = currencyFormat.format(internetFee)
+
+        tvElectricTotal.text = currencyFormat.format(elecTotal)
+        tvWaterTotal.text = currencyFormat.format(waterTotal)
+        tvRoomTotal.text = currencyFormat.format(roomFee)
+        tvInternetTotal.text = currencyFormat.format(internetFee)
+        tvGrandTotal.text = currencyFormat.format(grandTotal)
     }
 
     private fun showDatePickerDialog() {
         val calendar = Calendar.getInstance()
-        DatePickerDialog(
-            this,
-            { _, year, month, dayOfMonth ->
-                val formattedDate = "$dayOfMonth/${month + 1}/$year"
-                etDate.setText(formattedDate)
-                selectedDateString = String.format(Locale.getDefault(), "%02d/%d", month + 1, year)
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
+        DatePickerDialog(this, { _, year, month, dayOfMonth ->
+            val selectedDate = "$dayOfMonth/${month + 1}/$year"
+            etDate.setText(selectedDate)
+            selectedDateString = String.format(Locale.getDefault(), "%02d/%d", month + 1, year)
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
     }
 
     private fun saveBill() {
-        if (selectedDateString.isEmpty()) {
-            Toast.makeText(this, "Vui lòng chọn ngày cho hóa đơn!", Toast.LENGTH_SHORT).show()
-            return
-        }
-
         val oldElec = etOldElectric.text.toString().toIntOrNull() ?: 0
         val newElec = etNewElectric.text.toString().toIntOrNull() ?: 0
         if (newElec < oldElec) {
+            etNewElectric.error = "Số mới phải lớn hơn hoặc bằng số cũ"
             etNewElectric.requestFocus()
-            Toast.makeText(this, "Số điện mới không thể nhỏ hơn số điện cũ.", Toast.LENGTH_SHORT).show()
             return
         }
 
         val oldWater = etOldWater.text.toString().toIntOrNull() ?: 0
         val newWater = etNewWater.text.toString().toIntOrNull() ?: 0
         if (newWater < oldWater) {
+            etNewWater.error = "Số mới phải lớn hơn hoặc bằng số cũ"
             etNewWater.requestFocus()
-            Toast.makeText(this, "Số nước mới không thể nhỏ hơn số nước cũ.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        selectedRoom?.let { room ->
-            val electricTotal = tvElectricTotal.text.toString().replace(".", "").toDoubleOrNull() ?: 0.0
-            val waterTotal = tvWaterTotal.text.toString().replace(".", "").toDoubleOrNull() ?: 0.0
-            val roomFee = etRoomPrice.text.toString().toDoubleOrNull() ?: 0.0
-            val internetFee = etInternetPrice.text.toString().toDoubleOrNull() ?: 0.0
-
-            val tenantId = existingBill?.tenantId ?: tenantDao.getTenantByRoomId(room.id)?.id
-            if (tenantId == null) {
-                Toast.makeText(this, "Phòng chưa có người thuê, không thể tạo hóa đơn.", Toast.LENGTH_LONG).show()
-                return
-            }
-
-            if (existingBill != null) {
-                // Chế độ Sửa
-                val updatedBill = existingBill!!.copy(
-                    month = selectedDateString,
-                    oldElectricReading = oldElec,
-                    newElectricReading = newElec,
-                    oldWaterReading = oldWater,
-                    newWaterReading = newWater,
-                    electric = electricTotal,
-                    water = waterTotal,
-                    roomFee = roomFee,
-                    internet = internetFee,
-                    total = electricTotal + waterTotal + roomFee + internetFee,
-                    oldElectricImageUri = oldElectricImageUri?.toString() ?: existingBill!!.oldElectricImageUri,
-                    newElectricImageUri = newElectricImageUri?.toString() ?: existingBill!!.newElectricImageUri,
-                    oldWaterImageUri = oldWaterImageUri?.toString() ?: existingBill!!.oldWaterImageUri,
-                    newWaterImageUri = newWaterImageUri?.toString() ?: existingBill!!.newWaterImageUri
-                )
-                val rowsAffected = billDao.updateBill(updatedBill)
-                if (rowsAffected > 0) {
-                    Toast.makeText(this, "Cập nhật hóa đơn thành công!", Toast.LENGTH_SHORT).show()
-                    setResult(Activity.RESULT_OK)
-                    finish()
-                } else {
-                    Toast.makeText(this, "Cập nhật hóa đơn thất bại!", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                // Chế độ Tạo mới
-                val newBill = Bill(
-                    id = 0,
-                    month = selectedDateString,
-                    oldElectricReading = oldElec,
-                    newElectricReading = newElec,
-                    oldWaterReading = oldWater,
-                    newWaterReading = newWater,
-                    electric = electricTotal,
-                    water = waterTotal,
-                    roomFee = roomFee,
-                    internet = internetFee,
-                    total = electricTotal + waterTotal + roomFee + internetFee,
-                    roomId = room.id,
-                    tenantId = tenantId,
-                    roomName = room.name,
-                    status = "unpaid",
-                    oldElectricImageUri = oldElectricImageUri?.toString(),
-                    newElectricImageUri = newElectricImageUri?.toString(),
-                    oldWaterImageUri = oldWaterImageUri?.toString(),
-                    newWaterImageUri = newWaterImageUri?.toString()
-                )
-                val newId = billDao.insertBill(newBill)
-                if (newId > 0) {
-                    val title = "Hóa đơn mới"
-                    val message = "Bạn có hóa đơn cho tháng $selectedDateString. Vui lòng kiểm tra."
-                    val date = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
-                    notificationDao.insertNotification(title, message, "bill", date, tenantId)
-
-                    Toast.makeText(this, "Tạo hóa đơn thành công!", Toast.LENGTH_SHORT).show()
-                    setResult(Activity.RESULT_OK)
-                    finish()
-                } else {
-                    Toast.makeText(this, "Tạo hóa đơn thất bại!", Toast.LENGTH_SHORT).show()
-                }
-            }
+        val tenantId = selectedRoom?.let { tenantDao.getTenantByRoomId(it.id)?.id }
+        if (tenantId == null) {
+            Toast.makeText(this, "Phòng chưa có người thuê!", Toast.LENGTH_SHORT).show()
+            return
         }
-    }
 
-    private fun formatCurrency(amount: Double): String {
-        return currencyFormat.format(amount).replace("₫", "").trim()
+        val roomFee = etRoomPrice.text.toString().toDoubleOrNull() ?: (selectedRoom?.price ?: 0.0)
+        val internetFee = etInternetPrice.text.toString().toDoubleOrNull() ?: INTERNET_PRICE
+        val elecTotal = (newElec - oldElec) * ELECTRICITY_PRICE_PER_UNIT
+        val waterTotal = (newWater - oldWater) * WATER_PRICE_PER_UNIT
+        val grandTotal = elecTotal + waterTotal + roomFee + internetFee
+
+        val newBill = Bill(
+            id = 0, month = selectedDateString,
+            oldElectricReading = oldElec, newElectricReading = newElec,
+            oldWaterReading = oldWater, newWaterReading = newWater,
+            electric = elecTotal, water = waterTotal, roomFee = roomFee, internet = internetFee, total = grandTotal,
+            roomId = selectedRoom!!.id, tenantId = tenantId, roomName = selectedRoom!!.name, status = "unpaid",
+            oldElectricImageUri = oldElectricImageUri?.toString(), newElectricImageUri = newElectricImageUri?.toString(),
+            oldWaterImageUri = oldWaterImageUri?.toString(), newWaterImageUri = newWaterImageUri?.toString()
+        )
+
+        val newId = billDao.insertBill(newBill)
+        if (newId > 0) {
+            val title = "Hóa đơn mới"
+            val message = "Bạn có hóa đơn cho tháng $selectedDateString. Vui lòng kiểm tra."
+            val date = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+            notificationDao.insertNotification(title, message, "bill", date, tenantId)
+            Toast.makeText(this, "Tạo hóa đơn thành công!", Toast.LENGTH_SHORT).show()
+            finish()
+        } else {
+            Toast.makeText(this, "Tạo hóa đơn thất bại!", Toast.LENGTH_SHORT).show()
+        }
     }
 }

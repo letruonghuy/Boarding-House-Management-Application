@@ -1,105 +1,102 @@
 package com.example.qunlphngtr.adapter
 
-import android.net.Uri
-import android.util.Log
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import androidx.core.content.ContextCompat
 import com.example.qunlphngtr.R
 import com.example.qunlphngtr.model.Room
+import com.example.qunlphngtr.model.Tenant
+import java.text.NumberFormat
+import java.util.Locale
+
+data class RoomAdapterItem(val room: Room, val tenant: Tenant?, val unpaidBillCount: Int)
 
 class RoomAdapter(
-    private val rooms: MutableList<Room>,
-    private val onItemClick: (Room) -> Unit
-) : RecyclerView.Adapter<RoomAdapter.RoomViewHolder>() {
+    private var items: MutableList<RoomAdapterItem>,
+    private val onManageClick: (RoomAdapterItem) -> Unit,
+    private val onAddTenantClick: (RoomAdapterItem) -> Unit
+) : RecyclerView.Adapter<RoomAdapter.ViewHolder>() {
 
-    inner class RoomViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvName: TextView = itemView.findViewById(R.id.tvRoomName)
-        val imgRoom: ImageView = itemView.findViewById(R.id.imgRoom)
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        // Common
+        val tvRoomName: TextView = view.findViewById(R.id.tvRoomName)
+        val tvRoomStatus: TextView = view.findViewById(R.id.tvRoomStatus)
 
-        fun bind(room: Room) {
-            tvName.text = room.name
-            val tvPrice = itemView.findViewById<TextView>(R.id.tvPrice)
-            val tvStatus = itemView.findViewById<TextView>(R.id.tvStatus)
+        // Empty State
+        val layoutEmpty: LinearLayout = view.findViewById(R.id.layoutEmpty)
+        val tvRoomPriceEmpty: TextView = view.findViewById(R.id.tvRoomPriceEmpty)
+        val btnAddTenant: Button = view.findViewById(R.id.btnAddTenant)
 
-            // Format price
-            try {
-                val formatted = java.text.NumberFormat.getInstance(java.util.Locale.getDefault()).format(room.price)
-                tvPrice.text = String.format(java.util.Locale.getDefault(), "%s VNĐ", formatted)
-            } catch (e: Exception) {
-                tvPrice.text = String.format(java.util.Locale.getDefault(), "%s VNĐ", room.price)
-            }
+        // Occupied State
+        val layoutOccupied: LinearLayout = view.findViewById(R.id.layoutOccupied)
+        val tvTenantName: TextView = view.findViewById(R.id.tvTenantName)
+        val tvTenantPhone: TextView = view.findViewById(R.id.tvTenantPhone)
+        val tvRoomPriceOccupied: TextView = view.findViewById(R.id.tvRoomPriceOccupied)
+        val tvBillInfo: TextView = view.findViewById(R.id.tvBillInfo)
+        val btnManageRoom: Button = view.findViewById(R.id.btnManageRoom)
 
-            // --- SỬA: Thêm try-catch để chống crash ---
-            if (!room.imageUri.isNullOrEmpty()) {
-                try {
-                    // Cố gắng hiển thị ảnh từ URI
-                    imgRoom.setImageURI(Uri.parse(room.imageUri))
-                } catch (e: SecurityException) {
-                    // Nếu thất bại (ví dụ: mất quyền, file bị xóa),
-                    // hiển thị ảnh mặc định và log lỗi ra.
-                    Log.e("RoomAdapter", "Không thể tải ảnh: ${room.imageUri}", e)
-                    imgRoom.setImageResource(R.drawable.ic_room)
-                }
-            } else {
-                // Không có URI, hiển thị ảnh mặc định
-                imgRoom.setImageResource(R.drawable.ic_room)
-            }
-            // --- Kết thúc sửa ---
-            // Set status color
+        fun bind(item: RoomAdapterItem) {
+            val room = item.room
+            val currencyFormat = NumberFormat.getCurrencyInstance(Locale("vi", "VN"))
+            tvRoomName.text = room.name
+
             if (room.status == "available") {
-                tvStatus.setTextColor(ContextCompat.getColor(itemView.context, R.color.status_available))
-                tvStatus.text = itemView.context.getString(R.string.status_available_text)
+                // Show Empty Layout
+                layoutEmpty.visibility = View.VISIBLE
+                layoutOccupied.visibility = View.GONE
+                tvRoomStatus.text = "Trống"
+                tvRoomStatus.setBackgroundColor(Color.parseColor("#4CAF50")) // Green
+                tvRoomPriceEmpty.text = "Giá: ${currencyFormat.format(room.price)}"
+
+                btnAddTenant.setOnClickListener { onAddTenantClick(item) }
+
             } else {
-                tvStatus.setTextColor(ContextCompat.getColor(itemView.context, R.color.status_rented))
-                tvStatus.text = itemView.context.getString(R.string.status_occupied_text)
+                // Show Occupied Layout
+                layoutEmpty.visibility = View.GONE
+                layoutOccupied.visibility = View.VISIBLE
+                tvRoomStatus.text = "Đang thuê"
+                tvRoomStatus.setBackgroundColor(Color.parseColor("#F44336")) // Red
+
+                tvTenantName.text = "Người thuê: ${item.tenant?.name ?: "N/A"}"
+                tvTenantPhone.text = "SĐT: ${item.tenant?.phone ?: "N/A"}"
+                tvRoomPriceOccupied.text = "Giá: ${currencyFormat.format(room.price)}"
+
+                if (item.unpaidBillCount > 0) {
+                    tvBillInfo.text = "Có ${item.unpaidBillCount} hóa đơn chưa trả"
+                    tvBillInfo.setTextColor(Color.RED)
+                } else {
+                    tvBillInfo.text = "Không có công nợ"
+                    tvBillInfo.setTextColor(Color.DKGRAY)
+                }
+
+                btnManageRoom.setOnClickListener { onManageClick(item) }
             }
-
-            itemView.setOnClickListener { onItemClick(room) }
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RoomViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_room, parent, false)
-        return RoomViewHolder(view)
+        return ViewHolder(view)
     }
 
-    override fun getItemCount() = rooms.size
-
-    override fun onBindViewHolder(holder: RoomViewHolder, position: Int) {
-        holder.bind(rooms[position])
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(items[position])
     }
 
-    fun addRoom(room: Room) {
-        rooms.add(room)
-        notifyItemInserted(rooms.size - 1)
-    }
+    override fun getItemCount() = items.size
 
-    fun updateRoom(updated: Room) {
-        val index = rooms.indexOfFirst { it.id == updated.id }
-        if (index != -1) {
-            rooms[index] = updated
-            notifyItemChanged(index)
-        }
-    }
-
-    fun getRoomAt(position: Int): Room = rooms[position]
-
-    fun removeRoom(room: Room) {
-        val index = rooms.indexOf(room)
-        if (index != -1) {
-            rooms.removeAt(index)
-            notifyItemRemoved(index)
-        }
-    }
-
-    fun filterList(newList: List<Room>) {
-        rooms.clear()
-        rooms.addAll(newList)
+    fun updateList(newList: List<RoomAdapterItem>) {
+        items.clear()
+        items.addAll(newList)
         notifyDataSetChanged()
+    }
+
+    fun getItemAt(position: Int): RoomAdapterItem {
+        return items[position]
     }
 }

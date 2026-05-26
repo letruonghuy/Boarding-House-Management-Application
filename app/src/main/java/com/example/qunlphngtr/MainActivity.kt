@@ -1,67 +1,80 @@
 package com.example.qunlphngtr
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import com.example.qunlphngtr.dao.NotificationDao
+import com.example.qunlphngtr.dao.RoomDao
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
 
 class MainActivity : AppCompatActivity() {
-    private val REQUEST_POST_NOTIFICATIONS = 1001
-    private lateinit var notificationDao: NotificationDao
-    private lateinit var notificationBadge: TextView
+
+    private lateinit var roomDao: RoomDao
+
+    // Stats Views
+    private lateinit var tvTotalRooms: TextView
+    private lateinit var tvOccupiedRooms: TextView
+    private lateinit var tvEmptyRooms: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
-        val isLoggedIn = prefs.getBoolean("isLoggedIn", false)
-
-        if (!isLoggedIn) {
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-            return
-        }
-
-        val userRole = prefs.getString("role", null)
-
-        if (userRole == "tenant") {
-            startActivity(Intent(this, TenantHomeActivity::class.java))
-            finish()
-            return
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQUEST_POST_NOTIFICATIONS)
-            }
-        }
-
         setContentView(R.layout.activity_main)
-        notificationDao = NotificationDao(this)
-        notificationBadge = findViewById(R.id.notificationBadge)
 
-        setupNavigation()
-        setupCardListeners()
+        roomDao = RoomDao(this)
+        bindViews()
+        setupListeners()
     }
-
 
     override fun onResume() {
         super.onResume()
-        updateNotificationBadge()
+        loadStats()
     }
 
-    private fun setupNavigation() {
+    private fun bindViews() {
+        tvTotalRooms = findViewById(R.id.tvTotalRooms)
+        tvOccupiedRooms = findViewById(R.id.tvOccupiedRooms)
+        tvEmptyRooms = findViewById(R.id.tvEmptyRooms)
+    }
+
+    private fun loadStats() {
+        val allRooms = roomDao.getAllRooms()
+        val occupiedCount = allRooms.count { it.status != "available" }
+        val emptyCount = allRooms.size - occupiedCount
+
+        tvTotalRooms.text = allRooms.size.toString()
+        tvOccupiedRooms.text = occupiedCount.toString()
+        tvEmptyRooms.text = emptyCount.toString()
+    }
+
+    private fun setupListeners() {
+        // Feature clicks - Sửa lỗi: Tìm đúng kiểu MaterialCardView
+        findViewById<MaterialCardView>(R.id.featureRoomManagement).setOnClickListener {
+            startActivity(Intent(this, RoomManagementActivity::class.java))
+        }
+        findViewById<MaterialCardView>(R.id.featureTenantManagement).setOnClickListener {
+            startActivity(Intent(this, TenantListActivity::class.java))
+        }
+        findViewById<MaterialCardView>(R.id.featureBillManagement).setOnClickListener {
+            startActivity(Intent(this, BillActivity::class.java))
+        }
+        findViewById<MaterialCardView>(R.id.featureContractManagement).setOnClickListener {
+            startActivity(Intent(this, ContractListActivity::class.java))
+        }
+
+        // Header icons
+        findViewById<ImageView>(R.id.ivNotifications).setOnClickListener {
+            /*startActivity(Intent(this, NotificationsActivity::class.java))*/
+        }
+        findViewById<ImageView>(R.id.ivLogout).setOnClickListener {
+            showLogoutConfirmationDialog()
+        }
+
+        // Bottom Navigation
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.selectedItemId = R.id.nav_home
         bottomNav.setOnItemSelectedListener { item ->
@@ -82,77 +95,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupCardListeners() {
-        findViewById<MaterialCardView>(R.id.card1).setOnClickListener {
-            startActivity(Intent(this, QuanLyPhongActivity::class.java))
-        }
-        findViewById<MaterialCardView>(R.id.card2).setOnClickListener {
-            startActivity(Intent(this, TenantListActivity::class.java))
-        }
-        findViewById<MaterialCardView>(R.id.card3).setOnClickListener {
-            startActivity(Intent(this, BillActivity::class.java))
-        }
-        findViewById<MaterialCardView>(R.id.card4).setOnClickListener {
-            startActivity(Intent(this, NotificationActivity::class.java))
-        }
-        findViewById<MaterialCardView>(R.id.card5).setOnClickListener { // Contract Management
-            startActivity(Intent(this, ContractListActivity::class.java))
-        }
-    }
+    private fun showLogoutConfirmationDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Xác nhận đăng xuất")
+            .setMessage("Bạn có chắc chắn muốn đăng xuất không?")
+            .setPositiveButton("Đăng xuất") { _, _ ->
+                val prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+                prefs.edit().clear().apply()
 
-    private fun updateNotificationBadge() {
-        val unreadCount = notificationDao.getUnreadCountForLandlord()
-        if (unreadCount > 0) {
-            notificationBadge.visibility = View.VISIBLE
-            notificationBadge.text = unreadCount.toString()
-        } else {
-            notificationBadge.visibility = View.GONE
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_POST_NOTIFICATIONS) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Cho phép gửi thông báo", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Quyền thông báo bị từ chối.", Toast.LENGTH_LONG).show()
+                val intent = Intent(this, LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                finish()
             }
-        }
+            .setNegativeButton("Hủy", null)
+            .show()
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

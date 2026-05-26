@@ -2,91 +2,82 @@ package com.example.qunlphngtr
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.qunlphngtr.dao.TenantDao // <--- THÊM IMPORT NÀY
+import com.example.qunlphngtr.dao.TenantDao
 import com.example.qunlphngtr.dao.UserDao
-import com.example.qunlphngtr.model.Tenant // <--- THÊM IMPORT NÀY
 import com.example.qunlphngtr.model.User
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var userDao: UserDao
-    private lateinit var tenantDao: TenantDao // <--- THÊM DAO MỚI
+    private lateinit var tenantDao: TenantDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
         userDao = UserDao(this)
-        tenantDao = TenantDao(this) // <--- KHỞI TẠO DAO MỚI
+        tenantDao = TenantDao(this)
 
-        val inputFullName = findViewById<TextInputEditText>(R.id.inputFullName)
-        val inputPhone = findViewById<TextInputEditText>(R.id.inputPhone)
+        val inputIdentity = findViewById<TextInputEditText>(R.id.inputIdentity)
         val inputUsername = findViewById<TextInputEditText>(R.id.inputUsername)
         val inputPassword = findViewById<TextInputEditText>(R.id.inputPassword)
         val inputConfirmPassword = findViewById<TextInputEditText>(R.id.inputConfirmPassword)
-        val btnRegister = findViewById<MaterialButton>(R.id.btnRegister)
+        val btnRegister = findViewById<Button>(R.id.btnRegister)
         val tvLogin = findViewById<TextView>(R.id.tvLogin)
 
         btnRegister.setOnClickListener {
-            val fullName = inputFullName.text.toString().trim()
-            val phone = inputPhone.text.toString().trim()
+            val identity = inputIdentity.text.toString().trim()
             val username = inputUsername.text.toString().trim()
             val password = inputPassword.text.toString().trim()
             val confirmPassword = inputConfirmPassword.text.toString().trim()
 
-            if (fullName.isEmpty() || phone.isEmpty() || username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            if (identity.isEmpty() || username.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show()
-            } else if (password != confirmPassword) {
+                return@setOnClickListener
+            }
+
+            if (password != confirmPassword) {
                 Toast.makeText(this, "Mật khẩu xác nhận không khớp", Toast.LENGTH_SHORT).show()
-            } else {
-                val role = "tenant"
-                val newUser = User(0, username = username, password = password, role = role)
+                return@setOnClickListener
+            }
 
-                // 1. Thêm vào bảng User
-                val newUserIdLong = userDao.insertUser(newUser)
+            // Logic kích hoạt tài khoản bằng CCCD
+            val targetTenant = tenantDao.findUnactivatedTenantByIdentityNumber(identity)
 
-                if (newUserIdLong != -1L) {
-                    // --- BẮT ĐẦU SỬA Ở ĐÂY ---
-                    // 2. Thêm vào bảng Tenant (để liên kết)
-                    val newUserId = newUserIdLong.toInt() // Lấy ID của User vừa tạo
+            if (targetTenant == null) {
+                Toast.makeText(this, "Số CCCD không tồn tại hoặc tài khoản đã được kích hoạt.", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
 
-                    // Tạo một Tenant mới với thông tin cơ bản
-                    // Dùng đúng model 10 trường
-                    val newTenant = Tenant(
-                        id = 0, // id tự tăng
-                        name = fullName,
-                        gender = null, // Có thể thêm ô nhập Giới tính
-                        phone = phone,
-                        imageUri = null, // Ảnh đại diện mặc định
-                        identity_number = null, // Cập nhật sau
-                        room_id = null, // Admin sẽ gán phòng sau
-                        start_date = null,
-                        end_date = null,
-                        user_id = newUserId // <-- LIÊN KẾT QUAN TRỌNG NHẤT
-                    )
+            // Bắt đầu quá trình tạo User và liên kết
+            val newUser = User(id = 0, username = username, password = password, role = "tenant")
+            val newUserId = userDao.insertUser(newUser)
 
-                    // 3. Gọi TenantDao
-                    tenantDao.insertTenant(newTenant)
-                    // --- KẾT THÚC SỬA ---
+            if (newUserId > 0) {
+                // Tạo User thành công, bây giờ cập nhật Tenant
+                val updatedTenant = targetTenant.copy(user_id = newUserId.toInt())
+                val rowsAffected = tenantDao.updateTenant(updatedTenant)
 
-                    Toast.makeText(this, "Đăng ký thành công", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this, LoginActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                if (rowsAffected > 0) {
+                    Toast.makeText(this, "Kích hoạt tài khoản thành công! Vui lòng đăng nhập.", Toast.LENGTH_LONG).show()
+                    finish() // Quay về màn hình đăng nhập
                 } else {
-                    Toast.makeText(this, "Tên đăng nhập này đã tồn tại", Toast.LENGTH_SHORT).show()
+                    // Trường hợp hiếm gặp: không thể cập nhật tenant
+                    Toast.makeText(this, "Lỗi: Không thể liên kết tài khoản. Vui lòng thử lại.", Toast.LENGTH_SHORT).show()
+                    // Cần có cơ chế xóa User vừa tạo để tránh rác DB
                 }
+            } else {
+                // Lỗi có thể do username đã tồn tại
+                Toast.makeText(this, "Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.", Toast.LENGTH_SHORT).show()
             }
         }
 
         tvLogin.setOnClickListener {
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
             finish()
         }
     }

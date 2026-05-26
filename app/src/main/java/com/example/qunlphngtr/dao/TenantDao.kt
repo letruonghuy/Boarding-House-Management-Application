@@ -6,36 +6,57 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteConstraintException
 import com.example.qunlphngtr.database.DatabaseHelper
 import com.example.qunlphngtr.model.Tenant // Đảm bảo import đúng model
+import com.example.qunlphngtr.dao.BillDao
+import com.example.qunlphngtr.dao.RoomDao
 
-class TenantDao(context: Context) {
+class TenantDao(private val context: Context) {
 
     private val dbHelper = DatabaseHelper(context)
 
     private fun cursorToTenant(cursor: Cursor): Tenant {
-        val roomIdx = cursor.getColumnIndexOrThrow("room_id")
-        val userIdx = cursor.getColumnIndexOrThrow("user_id")
-        val roomId: Int? = if (cursor.isNull(roomIdx)) null else cursor.getInt(roomIdx)
-        val userId: Int? = if (cursor.isNull(userIdx)) null else cursor.getInt(userIdx)
+        fun getStringOrNull(colName: String): String? {
+            val index = cursor.getColumnIndex(colName)
+            return if (index != -1 && !cursor.isNull(index)) cursor.getString(index) else null
+        }
 
-        val cccdFront = cursor.getColumnIndex("cccd_front_uri")
-        val cccdBack = cursor.getColumnIndex("cccd_back_uri")
-        val cccdFrontVal: String? = if (cccdFront != -1 && !cursor.isNull(cccdFront)) cursor.getString(cccdFront) else null
-        val cccdBackVal: String? = if (cccdBack != -1 && !cursor.isNull(cccdBack)) cursor.getString(cccdBack) else null
+        fun getIntOrNull(colName: String): Int? {
+            val index = cursor.getColumnIndex(colName)
+            return if (index != -1 && !cursor.isNull(index)) cursor.getInt(index) else null
+        }
 
         return Tenant(
             id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
             name = cursor.getString(cursor.getColumnIndexOrThrow("name")),
-            gender = cursor.getString(cursor.getColumnIndexOrThrow("gender")),
-            phone = cursor.getString(cursor.getColumnIndexOrThrow("phone")),
-            imageUri = cursor.getString(cursor.getColumnIndexOrThrow("imageUri")),
-            identity_number = cursor.getString(cursor.getColumnIndexOrThrow("identity_number")),
-            room_id = roomId,
-            start_date = cursor.getString(cursor.getColumnIndexOrThrow("start_date")),
-            end_date = cursor.getString(cursor.getColumnIndexOrThrow("end_date")),
-            user_id = userId,
-            cccd_front_uri = cccdFrontVal,
-            cccd_back_uri = cccdBackVal
+            gender = getStringOrNull("gender"),
+            phone = getStringOrNull("phone"),
+            imageUri = getStringOrNull("imageUri"),
+            identity_number = getStringOrNull("identity_number"),
+            room_id = getIntOrNull("room_id"),
+            start_date = getStringOrNull("start_date"),
+            end_date = getStringOrNull("end_date"),
+            user_id = getIntOrNull("user_id"),
+            cccd_front_uri = getStringOrNull("cccd_front_uri"),
+            cccd_back_uri = getStringOrNull("cccd_back_uri")
         )
+    }
+
+    // HÀM MỚI CHUYÊN DỤNG
+    fun findUnactivatedTenantByIdentityNumber(identityNumber: String): Tenant? {
+        val db = dbHelper.readableDatabase
+        val cursor = db.query(
+            "Tenant",
+            null,
+            "identity_number = ? AND user_id IS NULL", // Điều kiện quan trọng
+            arrayOf(identityNumber),
+            null, null, null
+        )
+        var tenant: Tenant? = null
+        if (cursor.moveToFirst()) {
+            tenant = cursorToTenant(cursor)
+        }
+        cursor.close()
+        db.close()
+        return tenant
     }
 
     fun getTenantById(tenantId: Int): Tenant? {
@@ -150,9 +171,43 @@ class TenantDao(context: Context) {
     }
 
     fun deleteTenant(id: Int): Int {
+        // 1. Check for unpaid bills
+        val billDao = BillDao(context)
+        val unpaidBills = billDao.getUnpaidBillsByTenantId(id)
+        if (unpaidBills.isNotEmpty()) {
+            return -2 // Error code for unpaid bills
+        }
+
+        // 2. Get tenant info to find the room
+        val tenantToDelete = getTenantById(id)
+
+        // 3. Perform deletion and room update in a transaction
         val db = dbHelper.writableDatabase
-        val result = db.delete("Tenant", "id = ?", arrayOf(id.toString()))
-        db.close()
+        var result = 0
+        db.beginTransaction()
+        try {
+            // 3a. Update room if tenant was assigned to one
+            tenantToDelete?.room_id?.let {
+                val roomDao = RoomDao(context)
+                val room = roomDao.getRoomById(it)
+                room?.let {
+                    val updatedRoom = room.copy(status = "available", tenantId = null)
+                    roomDao.updateRoom(updatedRoom) // This should use the same db transaction if possible
+                }
+            }
+
+            // 3b. Delete the tenant
+            result = db.delete("Tenant", "id = ?", arrayOf(id.toString()))
+
+            db.setTransactionSuccessful()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            result = -1 // General error
+        } finally {
+            db.endTransaction()
+            db.close()
+        }
+
         return result
     }
 

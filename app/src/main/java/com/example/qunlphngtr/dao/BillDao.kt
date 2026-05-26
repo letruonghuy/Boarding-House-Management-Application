@@ -27,6 +27,49 @@ class BillDao(private val context: Context) {
         db.close()
         return result
     }
+    fun getUnpaidBillsByTenantId(tenantId: Int): List<Bill> {
+        val bills = mutableListOf<Bill>()
+        val db = dbHelper.readableDatabase
+        val query = "SELECT b.*, r.name as roomName FROM Bill b JOIN Room r ON b.room_id = r.id WHERE b.tenant_id = ? AND b.status IN ('unpaid', 'pending_confirmation')"
+        val cursor: Cursor = db.rawQuery(query, arrayOf(tenantId.toString()))
+        if (cursor.moveToFirst()) {
+            do {
+                bills.add(cursorToBill(cursor))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        db.close()
+        return bills
+    }
+    fun getUnpaidBillsByRoomId(roomId: Int): List<Bill> {
+        val bills = mutableListOf<Bill>()
+        val db = dbHelper.readableDatabase
+        val query = "SELECT b.*, r.name as roomName FROM Bill b JOIN Room r ON b.room_id = r.id WHERE b.room_id = ? AND b.status IN ('unpaid', 'pending_confirmation')"
+        val cursor: Cursor = db.rawQuery(query, arrayOf(roomId.toString()))
+        if (cursor.moveToFirst()) {
+            do {
+                bills.add(cursorToBill(cursor))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        db.close()
+        return bills
+    }
+
+    fun getBillsByRoomId(roomId: Int): List<Bill> {
+        val bills = mutableListOf<Bill>()
+        val db = dbHelper.readableDatabase
+        val query = "SELECT b.*, r.name as roomName FROM Bill b JOIN Room r ON b.room_id = r.id WHERE b.room_id = ? ORDER BY b.id DESC"
+        val cursor: Cursor = db.rawQuery(query, arrayOf(roomId.toString()))
+        if (cursor.moveToFirst()) {
+            do {
+                bills.add(cursorToBill(cursor))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        db.close()
+        return bills
+    }
 
     fun getAllBills(): MutableList<Bill> {
         val bills = mutableListOf<Bill>()
@@ -160,6 +203,10 @@ class BillDao(private val context: Context) {
     }
 
     fun deleteBill(id: Int): Int {
+        val bill = getBillById(id)
+        if (bill != null && bill.status != "paid") {
+            return -2 // Cannot delete unpaid bill
+        }
         val db = dbHelper.writableDatabase
         val result = db.delete("Bill", "id = ?", arrayOf(id.toString()))
         db.close()

@@ -27,8 +27,8 @@
         </activity>
         <activity android:name=".LoginActivity" android:exported="true" />
         <activity android:name=".RegisterActivity" android:exported="true" />
-        <activity android:name=".QuanLyPhongActivity" android:exported="true" />
         <activity android:name=".MainActivity" android:exported="true" />
+        <activity android:name=".RoomManagementActivity" android:exported="true" />
         <activity android:name=".BillActivity" android:exported="true" />
         <activity android:name=".SettingsActivity" android:exported="true" />
         <activity android:name=".RoomDetailActivity" android:exported="true" />
@@ -49,5 +49,6 @@
         <activity android:name=".ShowQrActivity" />
         <activity android:name=".ContractListActivity" />
         <activity android:name=".AddEditContractActivity" />
+        <activity android:name=".RoomDashboardActivity" />
     </application>
 </manifest>

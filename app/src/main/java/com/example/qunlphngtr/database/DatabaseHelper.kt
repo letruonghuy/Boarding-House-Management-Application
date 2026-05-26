@@ -9,8 +9,7 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         const val DATABASE_NAME = "boarding_house.db"
-        // Version 14: Add Contract table
-        const val DATABASE_VERSION = 14
+        const val DATABASE_VERSION = 15 // Tăng version để trigger onUpgrade
     }
 
     override fun onConfigure(db: SQLiteDatabase) {
@@ -27,6 +26,8 @@ class DatabaseHelper(context: Context) :
                 role TEXT CHECK(role IN ('landlord', 'tenant')) NOT NULL
             )
         """)
+
+        db.execSQL("INSERT INTO User (username, password, role) VALUES ('chutro', '123456', 'landlord')")
 
         db.execSQL("""
             CREATE TABLE Room (
@@ -54,6 +55,7 @@ class DatabaseHelper(context: Context) :
                 start_date TEXT,
                 end_date TEXT,
                 user_id INTEGER,
+                deposit REAL DEFAULT 0.0, -- Thêm cột deposit
                 cccd_front_uri TEXT,
                 cccd_back_uri TEXT,
                 FOREIGN KEY (room_id) REFERENCES Room(id),
@@ -86,80 +88,11 @@ class DatabaseHelper(context: Context) :
                 FOREIGN KEY (tenant_id) REFERENCES Tenant(id)
             )
         """)
-
-        db.execSQL("""
-            CREATE TABLE Contract (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                tenant_id INTEGER NOT NULL,
-                room_id INTEGER NOT NULL,
-                start_date TEXT NOT NULL,
-                end_date TEXT NOT NULL,
-                rent_price REAL NOT NULL,
-                deposit_amount REAL NOT NULL,
-                contract_pdf_uri TEXT,
-                FOREIGN KEY (tenant_id) REFERENCES Tenant(id),
-                FOREIGN KEY (room_id) REFERENCES Room(id)
-            )
-        """)
-
-        db.execSQL("""
-            CREATE TABLE Notification (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT,
-                message TEXT,
-                type TEXT,
-                date TEXT,
-                is_read INTEGER DEFAULT 0,
-                tenant_id INTEGER,
-                FOREIGN KEY (tenant_id) REFERENCES Tenant(id)
-            )
-        """)
-
-        db.execSQL("""
-            CREATE TABLE Report (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT,
-                content TEXT,
-                date TEXT,
-                status TEXT,
-                tenant_id INTEGER,
-                response TEXT,
-                FOREIGN KEY (tenant_id) REFERENCES Tenant(id)
-            )
-        """)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        if (oldVersion < 11) {
-            db.execSQL("ALTER TABLE Bill ADD COLUMN old_electric_image_uri TEXT")
-            db.execSQL("ALTER TABLE Bill ADD COLUMN new_electric_image_uri TEXT")
-            db.execSQL("ALTER TABLE Bill ADD COLUMN old_water_image_uri TEXT")
-            db.execSQL("ALTER TABLE Bill ADD COLUMN new_water_image_uri TEXT")
-        }
-        if (oldVersion < 12) {
-            db.execSQL("ALTER TABLE Bill ADD COLUMN old_electric_reading INTEGER DEFAULT 0")
-            db.execSQL("ALTER TABLE Bill ADD COLUMN new_electric_reading INTEGER DEFAULT 0")
-            db.execSQL("ALTER TABLE Bill ADD COLUMN old_water_reading INTEGER DEFAULT 0")
-            db.execSQL("ALTER TABLE Bill ADD COLUMN new_water_reading INTEGER DEFAULT 0")
-        }
-        if (oldVersion < 13) {
-            db.execSQL("ALTER TABLE Bill ADD COLUMN payment_proof_uri TEXT")
-        }
-        if (oldVersion < 14) {
-            db.execSQL("""
-                CREATE TABLE Contract (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    tenant_id INTEGER NOT NULL,
-                    room_id INTEGER NOT NULL,
-                    start_date TEXT NOT NULL,
-                    end_date TEXT NOT NULL,
-                    rent_price REAL NOT NULL,
-                    deposit_amount REAL NOT NULL,
-                    contract_pdf_uri TEXT,
-                    FOREIGN KEY (tenant_id) REFERENCES Tenant(id),
-                    FOREIGN KEY (room_id) REFERENCES Room(id)
-                )
-            """)
+        if (oldVersion < 15) {
+            db.execSQL("ALTER TABLE Tenant ADD COLUMN deposit REAL DEFAULT 0.0")
         }
     }
 }

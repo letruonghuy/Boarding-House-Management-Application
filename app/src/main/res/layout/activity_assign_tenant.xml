@@ -1,81 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="16dp"
-    android:background="@color/bgLight">
+    tools:context=".AssignTenantActivity">
 
-    <LinearLayout
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Gán người thuê vào phòng"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chọn người thuê (chưa có phòng)"
+        android:textSize="16sp"/>
+
+    <Spinner
+        android:id="@+id/spinnerTenants"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Gán vào phòng"
+        android:layout_marginTop="16dp"
+        android:textSize="16sp"/>
+
+    <Spinner
+        android:id="@+id/spinnerRooms"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"/>
+
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Gán Người Thuê cho Phòng"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="12dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Chọn người thuê"
-            android:layout_marginTop="8dp" />
-
-        <Spinner
-            android:id="@+id/spinnerTenants"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Chọn phòng"
-            android:layout_marginTop="12dp" />
-
-        <Spinner
-            android:id="@+id/spinnerRooms"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Số CMND/Hộ chiếu"
-            android:layout_marginTop="12dp" />
-
-        <EditText
+        android:layout_marginTop="16dp"
+        android:hint="Số CCCD/CMND">
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edtIdentity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nhập số CMND/CCCD" />
+            android:inputType="number"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ngày bắt đầu thuê"
-            android:layout_marginTop="12dp" />
-
-        <EditText
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Ngày bắt đầu thuê">
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edtStartDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:focusable="false"
-            android:clickable="true"
-            android:hint="Chọn ngày bắt đầu" />
+            android:focusable="false"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
-        <Button
-            android:id="@+id/btnSaveAssign"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Lưu"
-            android:layout_marginTop="16dp"
-            android:backgroundTint="@color/blue"
-            android:textColor="@android:color/white" />
+    <Button
+        android:id="@+id/btnSaveAssign"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Lưu thay đổi"/>
 
-    </LinearLayout>
-</ScrollView>
+</LinearLayout>

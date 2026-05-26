@@ -1,70 +1,142 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
+    app:cardCornerRadius="16dp"
     app:cardElevation="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <!-- Ảnh phòng -->
-        <ImageView
-            android:id="@+id/imgRoom"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_launcher_background" />
-
-        <!-- Thông tin phòng -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="73dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:paddingStart="12dp">
+        <!-- Room Name and Status -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/tvRoomName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Phòng 101"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:textColor="@color/textPrimary"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:text="Phòng 101" />
 
             <TextView
-                android:id="@+id/tvPrice"
+                android:id="@+id/tvRoomStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="2.000.000 VNĐ"
-                android:textColor="@color/blue"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp" />
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/badge_background"
+                android:paddingStart="12dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="4dp"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                tools:text="Đang thuê" />
+        </RelativeLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="#E0E0E0" />
+
+        <!-- Empty State Layout -->
+        <LinearLayout
+            android:id="@+id/layoutEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <TextView
-                android:id="@+id/tvStatus"
+                android:id="@+id/tvRoomPriceEmpty"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="16sp"
+                tools:text="Giá: 2,500,000đ" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddTenant"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Trạng thái: Còn trống"
-                android:textSize="13sp"
-                android:textColor="@android:color/holo_green_dark" />
-
-            <TextView
-                android:id="@+id/tvDescription"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Có ban công, 25m², gần chợ"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="13sp" />
-
+                android:text="Thêm khách" />
 
         </LinearLayout>
 
+        <!-- Occupied State Layout -->
+        <LinearLayout
+            android:id="@+id/layoutOccupied"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/tvTenantName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:textSize="16sp"
+                tools:text="Người thuê: Nguyễn Văn A" />
+            
+            <TextView
+                android:id="@+id/tvTenantPhone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:textSize="14sp"
+                tools:text="SĐT: 0987654321" />
+                
+            <TextView
+                android:id="@+id/tvRoomPriceOccupied"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:textSize="14sp"
+                tools:text="Giá: 3,000,000đ" />
+
+            <TextView
+                android:id="@+id/tvBillInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:textColor="@color/red"
+                android:textStyle="bold"
+                tools:text="Có 1 hóa đơn chưa thanh toán" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnManageRoom"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Quản lý phòng" />
+        </LinearLayout>
+
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

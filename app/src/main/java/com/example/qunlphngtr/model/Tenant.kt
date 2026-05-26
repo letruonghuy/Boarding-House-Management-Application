@@ -12,7 +12,7 @@ data class Tenant(
     val start_date: String?,
     val end_date: String?,
     val user_id: Int?,
-    // CCCD/CMND images (mặt trước và mặt sau)
+    val deposit: Double? = 0.0, // Thêm trường tiền cọc
     val cccd_front_uri: String? = null,
     val cccd_back_uri: String? = null
 )

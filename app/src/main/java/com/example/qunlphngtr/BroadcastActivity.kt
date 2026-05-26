@@ -1,3 +1,4 @@
+/*
 package com.example.qunlphngtr
 
 import android.os.Bundle
@@ -30,10 +31,15 @@ class BroadcastActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+*/
+/*
             val count = notificationDao.broadcastToAll(title, msg)
+*//*
+
             Toast.makeText(this, "Đã gửi $count thông báo", Toast.LENGTH_LONG).show()
             finish()
         }
     }
 }
 
+*/

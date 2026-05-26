@@ -1,3 +1,4 @@
+package com.example.qunlphngtr/*
 package com.example.qunlphngtr
 
 import android.app.Dialog
@@ -60,7 +61,9 @@ class QuanLyPhongActivity : AppCompatActivity() {
         rvRooms.layoutManager = LinearLayoutManager(this)
 
         val roomList = roomDao.getAllRooms().toMutableList()
-        roomAdapter = RoomAdapter(roomList) { /* bấm vào item nếu muốn */ }
+        roomAdapter = RoomAdapter(roomList) { */
+/* bấm vào item nếu muốn *//*
+ }
         rvRooms.adapter = roomAdapter
 
         val btnThemPhong = findViewById<Button>(R.id.btnAddRoom)
@@ -279,12 +282,12 @@ class QuanLyPhongActivity : AppCompatActivity() {
                 val paint = Paint()
                 val background = ColorDrawable()
 
-                if (dX > 0) { 
+                if (dX > 0) {
                     paint.color = Color.parseColor("#4CAF50")
                     background.color = paint.color
                     background.setBounds(itemView.left, itemView.top, itemView.left + dX.toInt(), itemView.bottom)
                     background.draw(c)
-                } else if (dX < 0) { 
+                } else if (dX < 0) {
                     paint.color = Color.parseColor("#F44336")
                     background.color = paint.color
                     background.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
@@ -319,6 +322,9 @@ class QuanLyPhongActivity : AppCompatActivity() {
         super.onStop()
         try {
             unregisterReceiver(roomsUpdatedReceiver)
-        } catch (e: Exception) { /* ignore */ }
+        } catch (e: Exception) { */
+/* ignore *//*
+ }
     }
 }
+*/

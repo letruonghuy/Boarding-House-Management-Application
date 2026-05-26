@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F5F5">
@@ -462,226 +463,152 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Bảng tính toán -->
-                <LinearLayout
+                <TableLayout
+                    android:id="@+id/calculationTable"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:background="#F5F5F5"
-                    android:orientation="vertical"
-                    android:padding="12dp">
+                    android:layout_marginTop="24dp">
 
-                    <!-- Header bảng -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                    <!-- Header -->
+                    <TableRow
+                        android:background="#E0E0E0"
+                        android:padding="8dp">
 
                         <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Dịch vụ"
-                            android:textColor="#000000"
-                            android:textSize="14sp"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:gravity="center"
-                            android:text="Số lượng/Giá"
-                            android:textColor="#000000"
-                            android:textSize="14sp"
+                            android:minWidth="50dp"
+                            android:text="Số"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:gravity="end"
-                            android:text="Thành tiền"
-                            android:textColor="#000000"
-                            android:textSize="14sp"
+                            android:minWidth="80dp"
+                            android:text="Giá"
                             android:textStyle="bold" />
-                    </LinearLayout>
+
+                        <TextView
+                            android:gravity="end"
+                            android:minWidth="90dp"
+                            android:text="Tiền"
+                            android:textStyle="bold" />
+                    </TableRow>
 
                     <!-- Tiền điện -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:orientation="horizontal">
+                    <TableRow android:padding="8dp">
 
                         <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Tiền điện"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
+                            android:text="Tiền điện" />
 
                         <TextView
                             android:id="@+id/tvElectricQuantity"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:gravity="center"
-                            android:text="0 kWh"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
+                            tools:text="0" />
+
+                        <TextView
+                            android:id="@+id/tvElectricUnitPrice"
+                            android:gravity="end"
+                            tools:text="4,000" />
 
                         <TextView
                             android:id="@+id/tvElectricTotal"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:gravity="end"
-                            android:text="0"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
-                    </LinearLayout>
+                            tools:text="0" />
+                    </TableRow>
 
                     <!-- Tiền nước -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:orientation="horizontal">
+                    <TableRow android:padding="8dp">
 
                         <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Tiền nước"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
+                            android:text="Tiền nước" />
 
                         <TextView
                             android:id="@+id/tvWaterQuantity"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:gravity="center"
-                            android:text="0 m³"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
+                            tools:text="0" />
+
+                        <TextView
+                            android:id="@+id/tvWaterUnitPrice"
+                            android:gravity="end"
+                            tools:text="20,000" />
 
                         <TextView
                             android:id="@+id/tvWaterTotal"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:gravity="end"
-                            android:text="0"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
-                    </LinearLayout>
+                            tools:text="0" />
+                    </TableRow>
 
                     <!-- Tiền phòng -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:orientation="horizontal">
+                    <TableRow android:padding="8dp">
 
                         <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Tiền phòng"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
+                            android:text="Tiền phòng" />
 
                         <TextView
-                            android:id="@+id/tvRoomPriceDisplay"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:gravity="center"
-                            android:text="5,000,000"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
+                            android:text="1" />
+
+                        <TextView
+                            android:id="@+id/tvRoomUnitPrice"
+                            android:gravity="end"
+                            tools:text="3,000,000" />
 
                         <TextView
                             android:id="@+id/tvRoomTotal"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:gravity="end"
-                            android:text="5,000,000"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
-                    </LinearLayout>
+                            tools:text="3,000,000" />
+                    </TableRow>
 
                     <!-- Tiền Internet -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:orientation="horizontal">
+                    <TableRow android:padding="8dp">
 
                         <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Tiền Internet"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
+                            android:text="Tiền Internet" />
 
                         <TextView
-                            android:id="@+id/tvInternetPriceDisplay"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:gravity="center"
-                            android:text="100,000"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
+                            android:text="1" />
+
+                        <TextView
+                            android:id="@+id/tvInternetUnitPrice"
+                            android:gravity="end"
+                            tools:text="100,000" />
 
                         <TextView
                             android:id="@+id/tvInternetTotal"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:gravity="end"
-                            android:text="100,000"
-                            android:textColor="#333333"
-                            android:textSize="14sp" />
-                    </LinearLayout>
+                            tools:text="100,000" />
+                    </TableRow>
 
                     <!-- Divider -->
                     <View
-                        android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginVertical="12dp"
-                        android:background="#CCCCCC" />
+                        android:background="#E0E0E0" />
 
                     <!-- Tổng tiền -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                    <TableRow android:padding="8dp">
 
                         <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
+                            android:layout_span="3"
                             android:text="Tổng tiền"
-                            android:textColor="#000000"
-                            android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvGrandTotal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="5,100,000"
-                            android:textColor="#000000"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
+                            android:gravity="end"
+                            android:textStyle="bold"
+                            tools:text="3,600,000" />
+                    </TableRow>
+
+                </TableLayout>
 
                 <!-- Nút Duyệt hóa đơn -->
                 <com.google.android.material.button.MaterialButton
@@ -689,10 +616,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:layout_marginTop="24dp"
-                    app:backgroundTint="#2196F3"
+                    app:backgroundTint="#03A9F4"
                     android:text="Tạo hóa đơn"
-                    android:textAllCaps="false"
-                    android:textSize="16sp"
                     app:cornerRadius="8dp" />
 
             </LinearLayout>

@@ -91,47 +91,13 @@
         android:layout_below="@id/tab_layout_notifications"
         android:layout_above="@+id/bottom_nav_layout">
 
-        <ScrollView
-            android:id="@+id/scroll_view_notifications"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_notifications"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="16dp"
+            android:padding="8dp"
             android:clipToPadding="false"
-            android:visibility="visible">
-            <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Mới"
-                android:textColor="@color/textPrimary"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
-
-            <include layout="@layout/list_item_notifications" />
-
-            <include layout="@layout/list_item_notifications" />
-
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Trước đó"
-                android:textColor="@color/textPrimary"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="8dp"/>
-
-            <include layout="@layout/list_item_notifications" />
-            <include layout="@layout/list_item_notifications" />
-
-        </LinearLayout>
-        </ScrollView>
+            tools:listitem="@layout/item_notification"/>
 
         <LinearLayout
             android:id="@+id/empty_view"
@@ -140,12 +106,14 @@
             android:layout_gravity="center"
             android:orientation="vertical"
             android:gravity="center"
-            android:visibility="gone"> <ImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/ic_bell"
-            app:tint="@color/textPrimary"
-            android:alpha="0.3"/>
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/ic_bell"
+                app:tint="@color/textPrimary"
+                android:alpha="0.3"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -159,7 +127,7 @@
 
     </FrameLayout>
 
-
+    <!-- Bottom Nav Placeholder -->
     <LinearLayout
         android:id="@+id/bottom_nav_layout"
         android:layout_width="match_parent"
@@ -171,79 +139,6 @@
         android:background="@color/white"
         android:elevation="8dp"
         android:layout_alignParentBottom="true">
-
-        <LinearLayout
-            android:id="@+id/navHome"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="8dp">
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_home"
-                app:tint="@color/textPrimary"
-                android:alpha="0.5" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Trang chủ"
-                android:textColor="@color/textPrimary"
-                android:alpha="0.5"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navAlerts"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="8dp">
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_bell"
-                app:tint="@color/blue" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Thông báo"
-                android:textColor="@color/blue"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navProfile"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="8dp">
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_users"
-                app:tint="@color/textPrimary"
-                android:alpha="0.5" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Trang cá nhân"
-                android:textColor="@color/textPrimary"
-                android:alpha="0.5"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-        </LinearLayout>
     </LinearLayout>
 
 </RelativeLayout>

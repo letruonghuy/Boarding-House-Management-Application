@@ -119,6 +119,10 @@ class TenantHomeActivity : AppCompatActivity() {
 
         findViewById<CardView>(R.id.cardNotifications).setOnClickListener {
             val intent = Intent(this, NotificationActivity::class.java)
+/*
+            startActivity(Intent(this, NotificationsActivity::class.java))
+*/
+
             startActivity(intent)
         }
 

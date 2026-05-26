@@ -49,4 +49,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    // Thư viện Google ML Kit Text Recognition
+    implementation("com.google.mlkit:text-recognition:16.0.0")
+
 }

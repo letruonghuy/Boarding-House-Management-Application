@@ -10,6 +10,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -19,24 +20,24 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.qunlphngtr.adapter.BillAdapter
 import com.example.qunlphngtr.dao.BillDao
 import com.example.qunlphngtr.dao.RoomDao
-import com.example.qunlphngtr.dao.TenantDao
 import com.example.qunlphngtr.model.Bill
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import java.text.SimpleDateFormat
 import java.util.*
 
 class BillActivity : AppCompatActivity() {
     private lateinit var billDao: BillDao
     private lateinit var roomDao: RoomDao
-    private lateinit var tenantDao: TenantDao
     private lateinit var adapter: BillAdapter
-    private lateinit var billList: MutableList<Bill>
-    private lateinit var etSearch: EditText
-    private lateinit var btnSelectMonth: LinearLayout
-    private lateinit var tvSelectedMonth: TextView
+    private var filteredRoomId: Int = -1
+
+    // State for filters
+    private var selectedMonth: String = ""
+    private var searchQuery: String = ""
 
     private val billLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            reloadList()
+            loadAndFilterBills()
         }
     }
 
@@ -46,127 +47,165 @@ class BillActivity : AppCompatActivity() {
 
         billDao = BillDao(this)
         roomDao = RoomDao(this)
-        tenantDao = TenantDao(this)
+        filteredRoomId = intent.getIntExtra("FILTER_ROOM_ID", -1)
 
+        // Bind views
         val recyclerView = findViewById<RecyclerView>(R.id.rvRooms)
+        val btnAddBill = findViewById<Button>(R.id.btnAddRoom)
+        val btnAdd = findViewById<ImageButton>(R.id.btnAdd)
+        val etSearch = findViewById<EditText>(R.id.etSearch)
+        val btnSelectMonth = findViewById<LinearLayout>(R.id.btnSelectMonth)
+        val btnGenerateAll = findViewById<Button>(R.id.btnGenerateAll)
+
+        // Setup UI
         setupRecyclerView(recyclerView)
         setupSwipeActions(recyclerView)
+        setupBottomNavigation()
 
-        val btnAddBill = findViewById<Button>(R.id.btnAddRoom)
-        btnAddBill.setOnClickListener { showRoomSelectionDialog() }
-
-        val btnGenerateAll = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnGenerateAll)
-        btnGenerateAll.setOnClickListener {
-            val calendar = Calendar.getInstance()
-            val dp = DatePickerDialog(this, { _, y, m, _ ->
-                val monthYear = String.format(Locale.getDefault(), "%02d/%d", m + 1, y)
-                billDao.generateMonthlyBills(monthYear)
-                reloadList()
-                Toast.makeText(this, "Đã tạo hóa đơn cho tháng $monthYear", Toast.LENGTH_LONG).show()
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
-            dp.show()
-        }
-
-        etSearch = findViewById(R.id.etSearch)
+        // Hide redundant button and setup listeners
+        btnAddBill.visibility = View.GONE
+        btnAdd.setOnClickListener { showRoomSelectionDialog() }
+        btnGenerateAll.setOnClickListener { showGenerateAllConfirmationDialog() }
+        btnSelectMonth.setOnClickListener { showMonthYearPickerDialog() }
         etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { filter(s.toString()) }
-            override fun afterTextChanged(s: Editable?) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                searchQuery = s.toString()
+                loadAndFilterBills()
+            }
         })
 
-        btnSelectMonth = findViewById(R.id.btnSelectMonth)
-        tvSelectedMonth = findViewById(R.id.tvSelectedMonth)
+        // Handle single room mode
+        if (filteredRoomId != -1) {
+            val room = roomDao.getRoomById(filteredRoomId)
+            findViewById<TextView>(R.id.tvTitle).text = "Hóa đơn của ${room?.name}"
+            // Hide buttons that are not relevant in single room view
+            btnAdd.visibility = View.GONE
+            btnGenerateAll.visibility = View.GONE
+            btnSelectMonth.visibility = View.GONE
+        } }
 
-        btnSelectMonth.setOnClickListener {
-            val calendar = Calendar.getInstance()
-            DatePickerDialog(this, { _, selectedYear, selectedMonth, _ ->
-                val monthYear = String.format(Locale.getDefault(), "%02d/%d", selectedMonth + 1, selectedYear)
-                tvSelectedMonth.text = "Tháng: $monthYear"
-                billList = billDao.getBillsByMonth(monthYear)
-                filter(etSearch.text.toString())
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+    private fun setupBottomNavigation() {
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        bottomNavigationView.selectedItemId = R.id.nav_bill // CORRECTED ID
+
+        bottomNavigationView.setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    startActivity(intent)
+                    true
+                }
+                R.id.nav_bill -> { // CORRECTED ID
+                    // Already here
+                    true
+                }
+                R.id.nav_tenants -> {
+                    val intent = Intent(this, TenantListActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    startActivity(intent)
+                    true
+                }
+                R.id.nav_settings -> {
+                    val intent = Intent(this, SettingsActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    startActivity(intent)
+                    true
+                }
+                else -> false
+            }
         }
+    }
 
-        setupBottomNavigation()
+    override fun onResume() {
+        super.onResume()
+        loadAndFilterBills()
     }
 
     private fun setupRecyclerView(recyclerView: RecyclerView) {
-        billList = billDao.getAllBills()
-        adapter = BillAdapter(billList)
+        adapter = BillAdapter(mutableListOf()) // Start with an empty list
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        // SỰ KIỆN 1: Nhấn để XEM CHI TIẾT
         adapter.onItemClick = { bill ->
             val intent = Intent(this, BillDetailActivity::class.java)
             intent.putExtra("invoice_id", bill.id)
-            intent.putExtra("isAdmin", true) // <-- THÊM DÒNG NÀY
-            billLauncher.launch(intent) // Dùng launcher để nhận kết quả
-        }
-
-        // SỰ KIỆN 2: Nhấn giữ để XÓA
-        adapter.onItemLongClick = { bill, position ->
-            AlertDialog.Builder(this)
-                .setTitle("Xác nhận xóa")
-                .setMessage("Bạn có chắc muốn xóa hóa đơn tháng ${bill.month} của phòng ${bill.roomName}?")
-                .setPositiveButton("Xóa") { _, _ ->
-                    if (billDao.deleteBill(bill.id) > 0) {
-                        reloadList() // Tải lại để cập nhật danh sách
-                        Toast.makeText(this, "Xóa hóa đơn thành công", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this, "Xóa hóa đơn thất bại", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                .setNegativeButton("Hủy", null)
-                .show()
+            intent.putExtra("isAdmin", true)
+            billLauncher.launch(intent)
         }
     }
 
+    private fun loadAndFilterBills() {
+        var filteredList = billDao.getAllBills()
+
+        // 1. Filter by Room ID if provided (highest priority)
+        if (filteredRoomId != -1) {
+            filteredList = filteredList.filter { it.roomId == filteredRoomId }.toMutableList()
+        } else {
+            // 2. Filter by selected month if not in single-room mode
+            if (selectedMonth.isNotEmpty()) {
+                filteredList = filteredList.filter { it.month == selectedMonth }.toMutableList()
+            }
+        }
+
+        // 3. Filter by search query
+        if (searchQuery.isNotEmpty()) {
+            filteredList = filteredList.filter {
+                it.roomName.contains(searchQuery, ignoreCase = true) || it.month.contains(searchQuery, true)
+            }.toMutableList()
+        }
+
+        adapter.updateList(filteredList)
+    }
+
     private fun setupSwipeActions(recyclerView: RecyclerView) {
-        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) { // Vuốt sang phải
+        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT or ItemTouchHelper.LEFT) {
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder) = false
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
                 val bill = adapter.getBillAt(position)
 
-                // SỰ KIỆN 3: Vuốt sang phải để SỬA
-                val intent = Intent(this@BillActivity, AddBillActivity::class.java)
-                intent.putExtra("BILL_ID", bill.id)
-                billLauncher.launch(intent)
-
-                adapter.notifyItemChanged(position) // Trả item về vị trí cũ
-            }
-
-            override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
-                val itemView = viewHolder.itemView
-                val background = ColorDrawable()
-                if (dX > 0) { // Chỉ vẽ khi vuốt sang phải
-                    background.color = Color.parseColor("#4CAF50") // Màu xanh lá
-                    background.setBounds(itemView.left, itemView.top, itemView.left + dX.toInt(), itemView.bottom)
-                    background.draw(c)
+                if (direction == ItemTouchHelper.RIGHT) { // EDIT
+                    val intent = Intent(this@BillActivity, AddBillActivity::class.java)
+                    intent.putExtra("BILL_ID", bill.id)
+                    billLauncher.launch(intent)
+                    adapter.notifyItemChanged(position)
+                } else { // DELETE
+                    AlertDialog.Builder(this@BillActivity)
+                        .setTitle("Xác nhận xóa")
+                        .setMessage("Bạn có chắc muốn xóa hóa đơn tháng ${bill.month} của phòng ${bill.roomName}?")
+                        .setPositiveButton("Xóa") { _, _ ->
+                            val deleteResult = billDao.deleteBill(bill.id)
+                            when {
+                                deleteResult > 0 -> {
+                                    loadAndFilterBills()
+                                    Toast.makeText(this@BillActivity, "Xóa hóa đơn thành công", Toast.LENGTH_SHORT).show()
+                                }
+                                deleteResult == -2 -> {
+                                    Toast.makeText(this@BillActivity, "Không thể xóa hóa đơn chưa thanh toán.", Toast.LENGTH_LONG).show()
+                                    adapter.notifyItemChanged(position) // Revert swipe
+                                }
+                                else -> {
+                                    Toast.makeText(this@BillActivity, "Xóa hóa đơn thất bại", Toast.LENGTH_SHORT).show()
+                                    adapter.notifyItemChanged(position) // Revert swipe
+                                }
+                            }
+                        }
+                        .setNegativeButton("Hủy") { _, _ -> adapter.notifyItemChanged(position) }
+                        .setCancelable(false)
+                        .show()
                 }
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             }
-        }
 
+        }
         ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView)
     }
 
-    private fun filter(text: String) {
-        val allBills = billDao.getAllBills()
-        val filteredList = if (text.isEmpty()) {
-            allBills
-        } else {
-            allBills.filter {
-                it.roomName.contains(text, ignoreCase = true)
-            }.toMutableList()
-        }
-        adapter.updateList(filteredList)
-    }
-
     private fun showRoomSelectionDialog() {
-        val rooms = roomDao.getAllRooms().filter { tenantDao.getTenantByRoomId(it.id) != null }
+        val rooms = roomDao.getAllRooms().filter { it.tenantId != null }
         if (rooms.isEmpty()) {
             Toast.makeText(this, "Không có phòng nào đang thuê để tạo hóa đơn.", Toast.LENGTH_LONG).show()
             return
@@ -183,38 +222,43 @@ class BillActivity : AppCompatActivity() {
             .setNegativeButton("Hủy", null)
             .show()
     }
+    private fun showMonthYearPickerDialog() {
+        val cal = Calendar.getInstance()
+        DatePickerDialog(
+            this,
+            { _, year, month, _ ->
+                val selectedCal = Calendar.getInstance()
+                selectedCal.set(Calendar.YEAR, year)
+                selectedCal.set(Calendar.MONTH, month)
+                val sdf = SimpleDateFormat("MM/yyyy", Locale.getDefault())
+                selectedMonth = sdf.format(selectedCal.time)
+                findViewById<TextView>(R.id.tvSelectedMonth).text = "Tháng: $selectedMonth"
+                loadAndFilterBills()
+            },
+            cal.get(Calendar.YEAR),
+            cal.get(Calendar.MONTH),
+            cal.get(Calendar.DAY_OF_MONTH)
+        ).show()
+    }
 
-    private fun setupBottomNavigation() {
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        bottomNav.selectedItemId = R.id.nav_bill
-        bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_home -> {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    overridePendingTransition(0, 0)
-                    true
+    private fun showGenerateAllConfirmationDialog() {
+        val cal = Calendar.getInstance()
+        val sdf = SimpleDateFormat("MM/yyyy", Locale.getDefault())
+        val currentMonth = sdf.format(cal.time)
+
+        AlertDialog.Builder(this)
+            .setTitle("Xác nhận Tạo Hóa Đơn")
+            .setMessage("Bạn có muốn tạo hóa đơn hàng loạt cho tháng $currentMonth không? Hành động này sẽ tạo hóa đơn cho tất cả các phòng đang có người thuê.")
+            .setPositiveButton("Tạo") { _, _ ->
+                val billsGenerated = billDao.generateMonthlyBills(currentMonth)
+                if (billsGenerated > 0) {
+                    Toast.makeText(this, "Đã tạo thành công $billsGenerated hóa đơn.", Toast.LENGTH_LONG).show()
+                    loadAndFilterBills() // Refresh the list
+                } else {
+                    Toast.makeText(this, "Không có hóa đơn nào được tạo. Có thể tất cả phòng đã có hóa đơn cho tháng này.", Toast.LENGTH_LONG).show()
                 }
-                R.id.nav_bill -> true
-                R.id.nav_settings -> {
-                    startActivity(Intent(this, SettingsActivity::class.java))
-                    overridePendingTransition(0, 0)
-                    true
-                }
-                else -> false
             }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        reloadList()
-    }
-
-    private fun reloadList() {
-        val currentSearch = etSearch.text.toString()
-        val allBills = billDao.getAllBills()
-        billList.clear()
-        billList.addAll(allBills)
-        filter(currentSearch)
+            .setNegativeButton("Hủy", null)
+            .show()
     }
 }
