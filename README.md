@@ -53,47 +53,47 @@ Dự án này thể hiện khả năng xây dựng một ứng dụng Android ho
 
 ## 4. Hình ảnh minh họa dự án
 ### Màn hình trang chủ (Chủ trọ)
-<img width="1224" height="2570" alt="image" src="https://github.com/user-attachments/assets/249173c2-7fe2-4427-9985-655d14298807" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/249173c2-7fe2-4427-9985-655d14298807" />
 
 ### Màn hình quản lý hóa đơn
-<img width="1224" height="2570" alt="image" src="https://github.com/user-attachments/assets/29d1493c-c32c-476e-bc32-93aa8b986a08" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/29d1493c-c32c-476e-bc32-93aa8b986a08" />
 
 ### Màn  hình trang cá nhân chủ trọ
-<img width="1224" height="2570" alt="image" src="https://github.com/user-attachments/assets/d8b68cdd-2423-4490-932c-054036e048cb" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/d8b68cdd-2423-4490-932c-054036e048cb" />
 
 ### Màn hình thông tin ngân hàng tạo mã QR thanh toán
-<img width="1224" height="2570" alt="image" src="https://github.com/user-attachments/assets/78db6163-1e40-48c7-b93d-25380518b8d7" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/78db6163-1e40-48c7-b93d-25380518b8d7" />
 
 ### Màn hình tạo hóa đơn
-<img width="1224" height="2570" alt="image" src="https://github.com/user-attachments/assets/2749d17a-5d64-4cd4-8250-37abc247e314" />
-<img width="1224" height="2570" alt="image" src="https://github.com/user-attachments/assets/600d8779-4068-496e-8102-b64f29ff36d4" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/2749d17a-5d64-4cd4-8250-37abc247e314" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/600d8779-4068-496e-8102-b64f29ff36d4" />
 
 
 ### Màn hình quản lý người thuê trọ
-<img width="1224" height="2570" alt="image" src="https://github.com/user-attachments/assets/9abc5847-c70f-4f90-9326-b1d0c5395b87" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/9abc5847-c70f-4f90-9326-b1d0c5395b87" />
 
 
 ### Màn hình Welcome
-<img width="1080" height="2424" alt="image" src="https://github.com/user-attachments/assets/d3071afe-e398-4e34-bc7a-111cedca4168" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/d3071afe-e398-4e34-bc7a-111cedca4168" />
 
 
 ### Màn hình Đăng nhập & Đăng ký
-<img width="1080" height="2424" alt="image" src="https://github.com/user-attachments/assets/1b63b687-8646-4c28-8854-211d395f5f2b" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/1b63b687-8646-4c28-8854-211d395f5f2b" />
 
 ### Màn hình chính (Giao diện Người thuê)
-<img width="1224" height="2570" alt="image" src="https://github.com/user-attachments/assets/bbabe534-bc4d-4510-ad29-17b8c1bbcc15" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/bbabe534-bc4d-4510-ad29-17b8c1bbcc15" />
 
 ### Màn hình Trang cá nhân (Người thuê)
-<img width="1080" height="2424" alt="image" src="https://github.com/user-attachments/assets/e6bfd672-f9ea-414c-bf9d-0c4a120b6791" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/e6bfd672-f9ea-414c-bf9d-0c4a120b6791" />
 
 ### Màn hình Quản lý Phòng (Giao diện Chủ trọ)
-<img width="1080" height="2424" alt="image" src="https://github.com/user-attachments/assets/7b3de365-e269-4441-b84b-4381b4a7220c" />
-<img width="1080" height="2424" alt="image" src="https://github.com/user-attachments/assets/d8d0e2e7-9d93-4327-b260-711e52d490ac" />
-<img width="1224" height="2570" alt="image" src="https://github.com/user-attachments/assets/9c53fb5a-89dc-4ae0-a671-598f9245fa08" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/7b3de365-e269-4441-b84b-4381b4a7220c" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/d8d0e2e7-9d93-4327-b260-711e52d490ac" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/9c53fb5a-89dc-4ae0-a671-598f9245fa08" />
 
 
 ### Màn hình Chi tiết Phòng
-<img width="1224" height="2570" alt="image" src="https://github.com/user-attachments/assets/a8c0e440-11fc-4f59-8be0-f50f5d34fe12" />
+<img width="400" height="840" alt="image" src="https://github.com/user-attachments/assets/a8c0e440-11fc-4f59-8be0-f50f5d34fe12" />
 
 ## 5. Hướng dẫn cài đặt và chạy dự án
 
