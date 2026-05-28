@@ -105,7 +105,7 @@ Dự án này thể hiện khả năng xây dựng một ứng dụng Android ho
 
 1.  **Clone repository về máy:**
     ```bash
-    git clone <URL_REPOSITORY_CUA_BAN>
+    git clone https://github.com/letruonghuy/Boarding-House-Management-Application
     ```
 
 2.  **Mở dự án trong Android Studio:**
@@ -126,6 +126,5 @@ Dự án này thể hiện khả năng xây dựng một ứng dụng Android ho
 ## 6. Thông tin tác giả
 
 *   **Họ và tên:** Lê Trương Trường Huy
-*   **MSSV:** 2224802010230
 
 ---
